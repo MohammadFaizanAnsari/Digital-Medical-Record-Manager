@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>📅 Request Appointment</h2>
+
+<form method="POST">
+    <label>Select Date:</label>
+    <input type="date" name="requested_date" required>
+    <button type="submit" class="btn btn-view">Request</button>
+</form>
+
+{% endblock %}

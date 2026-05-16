@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>📅 Appointment Requests</h2>
+
+<div class="card">
+    {% if appointments %}
+    <table>
+        <thead>
+            <tr>
+                <th>Patient ID</th>
+                <th>Name</th>
+                <th>Requested Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in appointments %}
+            <tr>
+                <td>{{ app[1] }}</td>
+                <td>{{ app[2] }}</td>
+                <td>{{ app[3] }}</td>
+                <td>
+                    {% if app[4] == 'pending' %}
+                        ⏳ Pending
+                    {% elif app[4] == 'approved' %}
+                        ✅ Approved
+                    {% elif app[4] == 'rejected' %}
+                        ❌ Rejected
+                    {% else %}
+                        Unknown
+                    {% endif %}
+                </td>
+                <td style="display:flex; gap:5px;">
+                    {% if app[4] == 'pending' %}
+                    <form method="POST" action="/appointments/{{ app[0] }}/approve" style="display:inline;">
+                        <button type="submit" class="btn btn-view">Yes</button>
+                    </form>
+                    <form method="POST" action="/appointments/{{ app[0] }}/reject" style="display:inline;">
+                        <button type="submit" class="btn btn-delete">No</button>
+                    </form>
+                    {% else %}
+                        <em>No actions</em>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No appointment requests at the moment.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<h2>Patient Profile</h2>
+
+<div class="card">
+    <h3>{{ patient.name }}</h3>
+    <p><strong>Age:</strong> {{ patient.age }}</p>
+    <p><strong>Phone:</strong> {{ patient.phone }}</p>
+</div>
+
+<hr>
+
+<!-- ================= PATIENT REPORT ================= -->
+<div class="card">
+    <h3>📄 Patient Report</h3>
+
+    {% if patient.report %}
+        <a href="/uploads/{{ patient.report }}" target="_blank" class="btn btn-view">
+            👀 View Report
+        </a>
+    {% else %}
+        <p>No report uploaded.</p>
+    {% endif %}
+</div>
+
+<br>
+
+<!-- ================= ADD MEDICINE ================= -->
+{% if session.get('role') == 'admin' %}
+<div class="card">
+    <h2>➕ Add Medicine</h2>
+
+    <form method="POST" action="/add_medicine/{{ patient.id }}">
+
+        <label>Medicine Name</label>
+        <input type="text" name="medicine_name" required>
+
+        <label>Dosage</label>
+        <input type="text" name="dosage">
+
+        <label>Times Per Day</label>
+        <input type="number" name="times_per_day">
+
+        <label>Total Days</label>
+        <input type="number" name="total_days">
+
+        <label>Quantity</label>
+        <input type="number" name="quantity">
+
+        <label>Start Date</label>
+        <input type="date" name="start_date">
+
+        <button class="btn btn-view">Save Medicine</button>
+    </form>
+</div>
+{% endif %}
+
+<br>
+
+<!-- ================= MEDICINES ================= -->
+<div class="card">
+<h3>Medicines</h3>
+
+{% if medicines %}
+<table>
+<tr>
+<th>Medicine</th>
+<th>Start Date</th>
+<th>Duration</th>
+<th>Status</th>
+</tr>
+
+{% for med in medicines %}
+<tr>
+<td>{{ med.medicine_name }}</td>
+<td>{{ med.start_date }}</td>
+<td>{{ med.duration }} days</td>
+<td>{{ med.status }}</td>
+</tr>
+{% endfor %}
+</table>
+
+{% else %}
+<p>No medicines added yet.</p>
+{% endif %}
+</div>
+
+<br>
+
+<!-- ================= ADD VISIT ================= -->
+{% if session.get('role') == 'admin' %}
+<div class="card">
+    <h2>➕ Add Visit</h2>
+
+    <form method="POST" action="/add_visit/{{ patient.id }}">
+
+        <label>Visit Date</label>
+        <input type="date" name="visit_date" required>
+
+        <label>Diagnosis</label>
+        <input type="text" name="diagnosis">
+
+        <label>Prescription</label>
+        <textarea name="prescription"></textarea>
+
+        <button class="btn btn-view">Save Visit</button>
+    </form>
+</div>
+{% endif %}
+
+<br>
+
+<!-- ================= VISIT HISTORY ================= -->
+<div class="card">
+<h3>Visit History</h3>
+
+{% if visits %}
+<table>
+<tr>
+<th>Date</th>
+<th>Diagnosis</th>
+<th>Prescription</th>
+</tr>
+
+{% for visit in visits %}
+<tr>
+<td>{{ visit[2] }}</td>
+<td>{{ visit[3] }}</td>
+<td>{{ visit[4] }}</td>
+</tr>
+{% endfor %}
+</table>
+
+{% else %}
+<p>No visit history available.</p>
+{% endif %}
+</div>
+
+<br>
+
+<a href="{{ url_for('view_patients') }}" class="btn btn-view">⬅ Back</a>
+
+<style>
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    animation: fadeIn 0.4s ease;
+}
+
+.btn-view {
+    padding: 10px 15px;
+    background: linear-gradient(135deg, #2196F3, #0d47a1);
+    color: white;
+    border-radius: 10px;
+    text-decoration: none;
+    display: inline-block;
+    transition: 0.3s;
+}
+
+.btn-view:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+@keyframes fadeIn {
+    from {opacity:0; transform:translateY(10px);}
+    to {opacity:1; transform:translateY(0);}
+}
+</style>
+
+{% endblock %}

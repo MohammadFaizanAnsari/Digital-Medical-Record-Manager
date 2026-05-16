@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Medical Manager</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<h2>Medical Manager</h2>
+
+<a href="/">Dashboard</a>
+<a href="/patients">Patients</a>
+<a href="/appointments">Appointments</a>
+
+</div>
+
+<div class="main-content">
+
+<h1>Digital Medical Record Manager</h1>
+<hr>
+
+{% block content %}{% endblock %}
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- ===== CALENDAR ===== -->
+<div id="calendar"></div>
+
+<br>
+
+<a href="/appointments" class="btn">Manage Appointments</a>
+
+<!-- ===== SELECTED DATE ===== -->
+<h3>Appointments on <span id="selectedDate">Select a date</span></h3>
+
+<!-- ===== TABLE ===== -->
+<table class="details-table">
+    <thead>
+        <tr>
+            <th>Patient</th>
+            <th>Phone</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody id="appointmentTable"></tbody>
+</table>
+
+
+<!-- ===== FULLCALENDAR CSS ===== -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+
+<!-- ===== FULLCALENDAR JS ===== -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    let calendarEl = document.getElementById('calendar');
+
+    let calendar = new FullCalendar.Calendar(calendarEl, {
+
+        initialView: 'dayGridMonth',
+        height: 600,
+
+        // 🔥 LOAD EVENTS FROM FLASK
+        events: "/appointment_calendar_data",
+
+        // 🔥 CLICK ON DATE
+        dateClick: function(info){
+
+            let selectedDate = info.dateStr;
+
+            document.getElementById("selectedDate").innerText = selectedDate;
+
+            fetch("/appointments_by_date?date=" + selectedDate)
+            .then(res => res.json())
+            .then(data => {
+
+                let table = document.getElementById("appointmentTable");
+                table.innerHTML = "";
+
+                // ✅ NO APPOINTMENTS
+                if(!data.appointments || data.appointments.length === 0){
+                    table.innerHTML = `
+                        <tr>
+                            <td colspan="3" style="text-align:center; color:red; font-weight:bold;">
+                                No Appointments
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                // ✅ SHOW ONLY SELECTED DATE DATA
+                data.appointments.forEach(a => {
+
+                    let row = `
+                        <tr>
+                            <td>${a.name}</td>
+                            <td>${a.phone}</td>
+                            <td>${a.status}</td>
+                        </tr>
+                    `;
+
+                    table.innerHTML += row;
+
+                });
+
+            })
+            .catch(error => {
+                console.error("Error fetching data:", error);
+            });
+
+        }
+
+    });
+
+    calendar.render();
+
+});
+</script>
+
+
+<!-- ===== STYLING ===== -->
+<style>
+
+#calendar {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+/* Hover effect */
+.fc-daygrid-day:hover {
+    background: #f3f7ff;
+    cursor: pointer;
+    transform: scale(1.02);
+    transition: 0.2s;
+}
+
+/* Event style */
+.fc-event {
+    border: none;
+    padding: 5px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* Smooth animation */
+.fc-daygrid-event {
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(5px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+/* Table styling */
+.details-table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+.details-table th, .details-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.details-table th {
+    background: #4CAF50;
+    color: white;
+}
+
+</style>
+
+{% endblock %}

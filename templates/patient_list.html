@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+    <h2>📋 Patient Records</h2>
+
+    <!-- Search -->
+    <form method="GET" action="{{ url_for('view_patients') }}">
+        <input type="text" name="search" placeholder="Search by name or phone"
+               value="{{ request.args.get('search','') }}">
+        <button class="btn btn-view" type="submit">Search</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Gender</th>
+                <th>Disease</th>
+                <th>Phone</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for patient in patients %}
+            <tr>
+                <td>{{ patient.id }}</td>
+                <td>{{ patient.name }}</td>
+                <td>{{ patient.gender }}</td>
+                <td>{{ patient.disease }}</td>
+                <td>{{ patient.phone }}</td>
+
+              <td>
+    <a class="btn btn-view"
+       href="{{ url_for('patient_profile', id=patient.id) }}">View</a>
+
+    <a class="btn btn-edit"
+       href="{{ url_for('edit_patient', patient_id=patient.id) }}">Edit</a>
+
+    <form method="POST"
+      action="{{ url_for('delete_patient', patient_id=patient.id) }}"
+      style="display:inline;">
+
+    <button class="btn btn-delete"
+            onclick="return confirm('Delete this patient?')">
+        Delete
+    </button>
+
+</form>
+</td>
+            </tr>
+
+            {% else %}
+            <tr>
+                <td colspan="6">No patients found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

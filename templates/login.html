@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Login | Digital Medical Record Manager</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+font-family:"Poppins",sans-serif;
+background:#f4f7fb;
+overflow:hidden;
+}
+
+/* ================= MAIN CONTAINER ================= */
+
+.container{
+display:flex;
+height:100vh;
+}
+
+/* ================= LEFT PANEL ================= */
+
+.left-panel{
+
+flex:1;
+
+color:white;
+
+display:flex;
+flex-direction:column;
+justify-content:center;
+
+padding:70px;
+
+position:relative;
+overflow:hidden;
+
+background-image:
+linear-gradient(
+rgba(20,40,80,0.86),
+rgba(42,82,152,0.86)
+),
+url("https://png.pngtree.com/png-clipart/20250101/original/pngtree-modern-hospital-building-with-red-cross-symbol-isolated-on-a-clean-png-image_18496639.png");
+
+background-size:cover;
+background-position:center;
+background-repeat:no-repeat;
+}
+
+/* FLOATING EFFECT */
+
+.left-panel::before{
+
+content:"";
+
+position:absolute;
+
+width:320px;
+height:320px;
+
+border-radius:50%;
+
+background:rgba(255,255,255,0.08);
+
+top:-100px;
+right:-80px;
+
+animation:float 8s ease-in-out infinite;
+}
+
+.left-panel::after{
+
+content:"";
+
+position:absolute;
+
+width:220px;
+height:220px;
+
+border-radius:50%;
+
+background:rgba(255,255,255,0.05);
+
+bottom:-60px;
+left:-60px;
+
+animation:float 10s ease-in-out infinite;
+}
+
+@keyframes float{
+
+0%{
+transform:translateY(0px);
+}
+
+50%{
+transform:translateY(20px);
+}
+
+100%{
+transform:translateY(0px);
+}
+
+}
+
+.left-panel h1{
+
+font-size:40px;
+font-weight:700;
+
+margin-bottom:18px;
+
+position:relative;
+z-index:2;
+}
+
+.left-panel p{
+
+font-size:16px;
+
+line-height:1.8;
+
+max-width:450px;
+
+opacity:0.95;
+
+position:relative;
+z-index:2;
+}
+
+/* ================= REGISTER BUTTON ================= */
+
+.top-register{
+
+position:absolute;
+
+top:25px;
+right:35px;
+
+z-index:10;
+}
+
+.top-register a{
+
+text-decoration:none;
+
+padding:12px 20px;
+
+border-radius:14px;
+
+background:
+linear-gradient(
+to right,
+#28a745,
+#1d7e34
+);
+
+color:white;
+
+font-size:14px;
+font-weight:600;
+
+transition:0.3s ease;
+
+box-shadow:
+0 10px 20px rgba(40,167,69,0.25);
+}
+
+.top-register a:hover{
+
+transform:translateY(-3px);
+
+}
+
+/* ================= RIGHT PANEL ================= */
+
+.right-panel{
+
+flex:1;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+padding:20px;
+
+background:
+linear-gradient(
+to bottom right,
+#ffffff,
+#edf3ff
+);
+}
+
+/* ================= LOGIN BOX ================= */
+
+.login-box{
+
+width:390px;
+
+padding:42px;
+
+border-radius:30px;
+
+background:rgba(255,255,255,0.80);
+
+backdrop-filter:blur(10px);
+
+box-shadow:
+0 15px 40px rgba(0,0,0,0.08),
+0 0 0 1px rgba(255,255,255,0.4);
+
+animation:fadeUp 1s ease;
+}
+
+@keyframes fadeUp{
+
+from{
+opacity:0;
+transform:translateY(35px);
+}
+
+to{
+opacity:1;
+transform:translateY(0px);
+}
+
+}
+
+.login-box h2{
+
+font-size:30px;
+font-weight:700;
+
+margin-bottom:28px;
+
+color:#1e3c72;
+
+text-align:center;
+}
+
+/* ================= FLASH MESSAGE ================= */
+
+.flash{
+
+background:#ffe3e3;
+
+color:#c0392b;
+
+padding:12px;
+
+border-radius:12px;
+
+margin-bottom:18px;
+
+font-size:14px;
+}
+
+/* ================= FORM ================= */
+
+form{
+display:flex;
+flex-direction:column;
+}
+
+label{
+
+font-size:14px;
+font-weight:500;
+
+margin-bottom:8px;
+
+color:#2c3e50;
+}
+
+/* ================= PREMIUM ROLE SELECTOR ================= */
+
+.custom-role-select{
+position:relative;
+margin-bottom:18px;
+}
+
+/* MAIN BOX */
+
+.selected-role{
+
+height:58px;
+
+padding:0 18px;
+
+border-radius:18px;
+
+background:
+linear-gradient(
+145deg,
+#ffffff,
+#f4f8ff
+);
+
+border:1px solid #dce3ef;
+
+display:flex;
+align-items:center;
+justify-content:space-between;
+
+cursor:pointer;
+
+transition:0.35s ease;
+
+box-shadow:
+0 8px 22px rgba(0,0,0,0.05);
+
+font-size:14px;
+font-weight:500;
+color:#2c3e50;
+}
+
+/* HOVER */
+
+.selected-role:hover{
+
+transform:translateY(-2px);
+
+border-color:#2a5298;
+
+box-shadow:
+0 12px 28px rgba(42,82,152,0.14);
+}
+
+/* ACTIVE */
+
+.custom-role-select.active .selected-role{
+
+border-color:#2a5298;
+
+box-shadow:
+0 0 0 4px rgba(42,82,152,0.12),
+0 12px 30px rgba(42,82,152,0.12);
+}
+
+/* ARROW */
+
+.arrow-container{
+
+width:28px;
+height:28px;
+
+border-radius:50%;
+
+background:#edf3ff;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+transition:0.3s ease;
+}
+
+.dropdown-arrow{
+
+font-size:16px;
+
+color:#2a5298;
+
+transition:0.3s ease;
+}
+
+.custom-role-select.active .dropdown-arrow{
+
+transform:rotate(180deg);
+
+}
+
+/* DROPDOWN */
+
+.role-options{
+
+position:absolute;
+
+top:68px;
+left:0;
+
+width:100%;
+
+background:white;
+
+border-radius:18px;
+
+padding:10px;
+
+opacity:0;
+visibility:hidden;
+
+transform:
+translateY(-10px)
+scale(0.96);
+
+transition:0.35s ease;
+
+box-shadow:
+0 18px 35px rgba(0,0,0,0.12);
+
+z-index:100;
+}
+
+/* SHOW */
+
+.custom-role-select.active .role-options{
+
+opacity:1;
+visibility:visible;
+
+transform:
+translateY(0px)
+scale(1);
+
+}
+
+/* OPTION */
+
+.role-option{
+
+height:54px;
+
+padding:0 16px;
+
+border-radius:14px;
+
+display:flex;
+align-items:center;
+gap:12px;
+
+cursor:pointer;
+
+transition:0.25s ease;
+
+font-size:14px;
+font-weight:500;
+color:#2c3e50;
+}
+
+.role-option:hover{
+
+background:#edf3ff;
+
+transform:translateX(4px);
+
+}
+
+/* DOTS */
+
+.role-dot{
+
+width:12px;
+height:12px;
+
+border-radius:50%;
+}
+
+.doctor-dot{
+background:#2a5298;
+}
+
+.patient-dot{
+background:#28a745;
+}
+
+/* ================= INPUTS ================= */
+
+input{
+
+padding:15px;
+
+border-radius:14px;
+
+border:1px solid #d8dfe9;
+
+margin-bottom:18px;
+
+font-size:14px;
+
+background:white;
+
+transition:0.3s ease;
+}
+
+input:focus{
+
+outline:none;
+
+border-color:#2a5298;
+
+box-shadow:
+0 0 0 4px rgba(42,82,152,0.12);
+
+transform:translateY(-1px);
+}
+
+/* ================= BUTTON ================= */
+
+button{
+
+height:55px;
+
+border:none;
+
+border-radius:15px;
+
+background:
+linear-gradient(
+to right,
+#2a5298,
+#1e3c72
+);
+
+color:white;
+
+font-size:15px;
+font-weight:600;
+
+cursor:pointer;
+
+transition:0.3s ease;
+
+margin-top:5px;
+}
+
+button:hover{
+
+transform:translateY(-3px);
+
+box-shadow:
+0 12px 25px rgba(42,82,152,0.25);
+}
+
+/* ================= FOOTER ================= */
+
+.footer{
+
+margin-top:20px;
+
+text-align:center;
+
+font-size:12px;
+
+color:#7f8c8d;
+}
+
+/* ================= MOBILE RESPONSIVE ================= */
+
+@media(max-width:900px){
+
+body{
+overflow:auto;
+}
+
+.container{
+flex-direction:column;
+height:auto;
+}
+
+.left-panel{
+
+height:35vh;
+
+padding:35px;
+
+text-align:center;
+
+align-items:center;
+}
+
+.left-panel h1{
+font-size:30px;
+}
+
+.left-panel p{
+font-size:14px;
+max-width:95%;
+}
+
+.right-panel{
+padding:30px 20px;
+}
+
+.login-box{
+
+width:100%;
+max-width:400px;
+
+padding:32px 24px;
+}
+
+.top-register{
+
+top:15px;
+right:15px;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- LEFT PANEL -->
+
+<div class="left-panel">
+
+<h1>
+Digital Medical Record Manager
+</h1>
+
+<p>
+Secure, centralized, and efficient patient data management system designed for modern healthcare professionals.
+</p>
+
+</div>
+
+<!-- REGISTER BUTTON -->
+
+<div class="top-register">
+
+<a href="/register_doctor">
+Register
+</a>
+
+</div>
+
+<!-- RIGHT PANEL -->
+
+<div class="right-panel">
+
+<div class="login-box">
+
+<h2>
+Welcome Back
+</h2>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for msg in messages %}
+
+<div class="flash">
+{{ msg }}
+</div>
+
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<form method="POST">
+
+<!-- ROLE SELECTOR -->
+
+<label>
+Login As
+</label>
+
+<div class="custom-role-select" id="customRoleSelect">
+
+<div class="selected-role" onclick="toggleRoleMenu()">
+
+<span id="selectedRoleText">
+Select Your Role
+</span>
+
+<div class="arrow-container">
+
+<span class="dropdown-arrow">
+⌄
+</span>
+
+</div>
+
+</div>
+
+<!-- DROPDOWN -->
+
+<div class="role-options" id="roleOptions">
+
+<!-- DOCTOR -->
+
+<div
+class="role-option"
+onclick="selectRole('admin','Doctor')"
+>
+
+<div class="role-dot doctor-dot"></div>
+
+<span>
+Doctor
+</span>
+
+</div>
+
+<!-- PATIENT -->
+
+<div
+class="role-option"
+onclick="selectRole('patient','Patient')"
+>
+
+<div class="role-dot patient-dot"></div>
+
+<span>
+Patient
+</span>
+
+</div>
+
+</div>
+
+<input
+type="hidden"
+name="role"
+id="roleInput"
+required
+>
+
+</div>
+
+<!-- EMAIL -->
+
+<label>
+Email
+</label>
+
+<input
+type="text"
+name="username"
+placeholder="Enter your email"
+required
+>
+
+<!-- PASSWORD -->
+
+<label>
+Password
+</label>
+
+<input
+type="password"
+name="password"
+placeholder="Enter your password"
+required
+>
+
+<!-- LOGIN BUTTON -->
+
+<button type="submit">
+
+Login Securely
+
+</button>
+
+</form>
+
+<div class="footer">
+© 2026 DMRM System | Secure Access
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const customRoleSelect =
+document.getElementById("customRoleSelect");
+
+const selectedRoleText =
+document.getElementById("selectedRoleText");
+
+const roleInput =
+document.getElementById("roleInput");
+
+/* TOGGLE MENU */
+
+function toggleRoleMenu(){
+
+customRoleSelect
+.classList
+.toggle("active");
+
+}
+
+/* SELECT ROLE */
+
+function selectRole(value,text){
+
+roleInput.value=value;
+
+selectedRoleText.innerHTML=text;
+
+customRoleSelect
+.classList
+.remove("active");
+
+}
+
+/* CLOSE OUTSIDE */
+
+window.addEventListener("click",(e)=>{
+
+if(!customRoleSelect.contains(e.target)){
+
+customRoleSelect
+.classList
+.remove("active");
+
+}
+
+});
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>📊 Dashboard Overview</h2>
+
+<!-- ================= DOCTOR INFO ================= -->
+
+<div class="card clinic-info">
+
+<h2>Welcome Dr. {{ doctor.name }}</h2>
+
+<p><b>Clinic:</b> {{ doctor.clinic_name }}</p>
+
+<p><b>Address:</b> {{ doctor.clinic_address }}</p>
+
+</div>
+
+<!-- ================= DASHBOARD BUTTONS ================= -->
+
+<div class="dashboard-buttons">
+
+<a href="/appointments" class="btn appointment-btn">
+    📅 Appointments
+
+    {% if pending_appointments > 0 %}
+    <span class="notification-dot"></span>
+    {% endif %}
+</a>
+
+<a href="/appointment_calendar" class="btn">
+    📅 See Calendar
+</a>
+
+</div>
+
+<!-- ================= STATS ================= -->
+
+<div class="stats-container">
+
+<div class="card stat-card blue">
+    <h3>Total Patients</h3>
+    <h1>{{ total_patients }}</h1>
+</div>
+
+<div class="card stat-card green">
+    <h3>Total Visits</h3>
+    <h1>{{ total_visits }}</h1>
+</div>
+
+</div>
+
+<!-- ================= RECENT PATIENTS ================= -->
+
+<div class="card">
+
+<h3>🆕 Recently Added Patients</h3>
+
+<table class="patient-table">
+
+    <tr>
+        <th>Name</th>
+        <th>Age</th>
+        <th>Phone</th>
+    </tr>
+
+    {% for patient in recent_patients %}
+    <tr>
+        <td>{{ patient.name }}</td>
+        <td>{{ patient.age }}</td>
+        <td>{{ patient.phone }}</td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+</div>
+
+<!-- ================= STYLES ================= -->
+
+<style>
+
+.dashboard-buttons{
+display:flex;
+gap:15px;
+margin:20px 0;
+flex-wrap:wrap;
+}
+
+/* Stat Cards */
+
+.stats-container{
+display:flex;
+gap:20px;
+flex-wrap:wrap;
+margin-bottom:20px;
+}
+
+.stat-card{
+flex:1;
+text-align:center;
+color:white;
+}
+
+.blue{
+background:linear-gradient(135deg,#1e3c72,#2a5298);
+}
+
+.green{
+background:linear-gradient(135deg,#11998e,#38ef7d);
+}
+
+/* Table */
+
+.patient-table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+.patient-table th,
+.patient-table td{
+padding:12px;
+border-bottom:1px solid #ddd;
+text-align:left;
+}
+
+/* Appointment button */
+
+.appointment-btn{
+position:relative;
+background:#3a5a94;
+color:white;
+}
+
+/* Red notification dot */
+
+.notification-dot{
+position:absolute;
+top:-5px;
+right:-5px;
+width:12px;
+height:12px;
+background:red;
+border-radius:50%;
+}
+
+</style>
+
+{% endblock %}

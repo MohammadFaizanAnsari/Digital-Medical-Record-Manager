@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Welcome, {{ patient.name }}</h2>
+
+<!-- ================= PERSONAL DETAILS ================= -->
+<div class="card">
+    <h3>Personal Details</h3>
+    <p><strong>Age:</strong> {{ patient[2] }}</p>
+    <p><strong>Gender:</strong> {{ patient[3] }}</p>
+    <p><strong>Disease:</strong> {{ patient[7] }}</p>
+    <p><strong>Blood Group:</strong> {{ patient[8] }}</p>
+</div>
+
+<!-- ================= REPORT ================= -->
+<div class="card">
+    <h3>📄 Your Medical Report</h3>
+
+    {% if patient[10] %}
+        <a href="/uploads/{{ patient[10] }}" target="_blank" class="btn btn-view">
+            👀 View Report
+        </a>
+    {% else %}
+        <p>No report uploaded yet.</p>
+    {% endif %}
+</div>
+
+<!-- ================= REQUEST APPOINTMENT ================= -->
+<div class="card">
+    <h3>📅 Request Appointment</h3>
+
+    <form method="POST" action="/request_appointment">
+
+        <label>Select Date</label>
+        <input type="date" name="requested_date" required>
+
+        <br><br>
+
+        <button type="submit" class="btn btn-request">
+            Request Appointment
+        </button>
+
+    </form>
+</div>
+
+<!-- ================= APPOINTMENTS ================= -->
+<div class="card">
+<h3>📅 Your Appointments</h3>
+
+{% if appointments %}
+<table>
+<tr>
+<th>Date</th>
+<th>Status</th>
+</tr>
+
+{% for app in appointments %}
+<tr>
+<td>{{ app[3] }}</td>
+<td>
+    {% if app[4] == 'pending' %}
+        ⏳ Pending
+    {% elif app[4] == 'approved' %}
+        ✅ Approved
+    {% elif app[4] == 'rejected' %}
+        ❌ Rejected
+    {% endif %}
+</td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<p>No appointments yet.</p>
+{% endif %}
+</div>
+
+<!-- ================= VISITS ================= -->
+<div class="card">
+<h3>Visit History</h3>
+
+{% if visits %}
+<table>
+<tr>
+<th>Date</th>
+<th>Diagnosis</th>
+<th>Prescription</th>
+</tr>
+
+{% for visit in visits %}
+<tr>
+<td>{{ visit[2] }}</td>
+<td>{{ visit[3] }}</td>
+<td>{{ visit[4] }}</td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<p>No visit history available.</p>
+{% endif %}
+</div>
+
+<!-- ================= MEDICINE ALERT ================= -->
+<div class="card" style="background:#fff3cd;">
+<h3>💊 Medicine Alerts</h3>
+
+{% if medicine_alerts %}
+    {% for alert in medicine_alerts %}
+        <div class="alert-box">{{ alert }}</div>
+    {% endfor %}
+{% else %}
+<p>All medicines are up to date ✅</p>
+{% endif %}
+</div>
+
+<br>
+
+<a href="/logout" class="btn btn-delete">Logout</a>
+
+<!-- ================= STYLE ================= -->
+<style>
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    animation: fadeIn 0.4s ease;
+}
+
+/* Buttons */
+.btn-view {
+    padding: 10px 15px;
+    background: linear-gradient(135deg, #4CAF50, #2e7d32);
+    color: white;
+    border-radius: 10px;
+    text-decoration: none;
+}
+
+.btn-request {
+    padding: 10px 15px;
+    background: linear-gradient(135deg, #2196F3, #0d47a1);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-request:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.btn-delete {
+    padding: 10px 15px;
+    background: #e53935;
+    color: white;
+    border-radius: 10px;
+    text-decoration: none;
+}
+
+/* Alerts */
+.alert-box {
+    background: #ffe6e6;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+/* Input */
+input[type="date"] {
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {opacity:0; transform:translateY(10px);}
+    to {opacity:1; transform:translateY(0);}
+}
+
+</style>
+
+{% endblock %}

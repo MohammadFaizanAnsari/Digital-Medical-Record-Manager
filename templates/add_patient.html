@@ -1,0 +1,799 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+
+/* ================= MAIN CARD ================= */
+
+.patient-card{
+
+max-width:720px;
+
+margin:auto;
+
+padding:38px;
+
+border-radius:30px;
+
+background:
+linear-gradient(
+145deg,
+#ffffff,
+#f7faff
+);
+
+box-shadow:
+0 18px 40px rgba(0,0,0,0.07);
+
+animation:fadeUp 0.8s ease;
+}
+
+/* ================= ANIMATION ================= */
+
+@keyframes fadeUp{
+
+from{
+opacity:0;
+transform:translateY(30px);
+}
+
+to{
+opacity:1;
+transform:translateY(0px);
+}
+
+}
+
+.patient-card h2{
+
+font-size:32px;
+
+font-weight:700;
+
+color:#1e3c72;
+
+margin-bottom:35px;
+
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+/* ================= FORM ================= */
+
+.patient-form{
+
+display:flex;
+flex-direction:column;
+
+gap:22px;
+}
+
+/* ================= FORM GROUP ================= */
+
+.form-group{
+display:flex;
+flex-direction:column;
+}
+
+/* ================= LABEL ================= */
+
+label{
+
+font-size:14px;
+font-weight:600;
+
+margin-bottom:10px;
+
+color:#2c3e50;
+}
+
+/* ================= INPUTS ================= */
+
+input,
+textarea{
+
+width:100%;
+
+padding:16px 18px;
+
+border-radius:18px;
+
+border:1px solid #d9e1ec;
+
+background:
+linear-gradient(
+145deg,
+#ffffff,
+#f8fbff
+);
+
+font-size:14px;
+
+transition:0.3s ease;
+
+box-shadow:
+0 6px 18px rgba(0,0,0,0.04);
+}
+
+/* FOCUS */
+
+input:focus,
+textarea:focus{
+
+outline:none;
+
+border-color:#2a5298;
+
+transform:translateY(-2px);
+
+box-shadow:
+0 0 0 4px rgba(42,82,152,0.10),
+0 12px 28px rgba(42,82,152,0.10);
+}
+
+/* ================= CUSTOM GENDER SELECT ================= */
+
+.custom-gender-select{
+position:relative;
+}
+
+/* MAIN SELECT */
+
+.selected-gender{
+
+height:58px;
+
+padding:0 18px;
+
+border-radius:18px;
+
+background:
+linear-gradient(
+145deg,
+#ffffff,
+#f4f8ff
+);
+
+border:1px solid #dce3ef;
+
+display:flex;
+align-items:center;
+justify-content:space-between;
+
+cursor:pointer;
+
+transition:0.35s ease;
+
+box-shadow:
+0 8px 22px rgba(0,0,0,0.05);
+
+font-size:14px;
+font-weight:500;
+
+color:#7f8c8d;
+}
+
+/* WHEN SELECTED */
+
+.selected-gender.selected{
+
+color:#2c3e50;
+
+font-weight:500;
+}
+
+/* HOVER */
+
+.selected-gender:hover{
+
+transform:translateY(-2px);
+
+border-color:#2a5298;
+
+box-shadow:
+0 12px 28px rgba(42,82,152,0.12);
+}
+
+/* ACTIVE */
+
+.custom-gender-select.active .selected-gender{
+
+border-color:#2a5298;
+
+box-shadow:
+0 0 0 4px rgba(42,82,152,0.10),
+0 12px 30px rgba(42,82,152,0.12);
+}
+
+/* ARROW */
+
+.gender-arrow{
+
+font-size:18px;
+
+color:#2a5298;
+
+transition:0.3s ease;
+}
+
+.custom-gender-select.active .gender-arrow{
+
+transform:rotate(180deg);
+
+}
+
+/* DROPDOWN */
+
+.gender-options{
+
+position:absolute;
+
+top:68px;
+left:0;
+
+width:100%;
+
+background:white;
+
+border-radius:18px;
+
+padding:10px;
+
+opacity:0;
+visibility:hidden;
+
+transform:
+translateY(-10px)
+scale(0.96);
+
+transition:0.35s ease;
+
+box-shadow:
+0 18px 35px rgba(0,0,0,0.12);
+
+z-index:100;
+}
+
+/* SHOW */
+
+.custom-gender-select.active .gender-options{
+
+opacity:1;
+visibility:visible;
+
+transform:
+translateY(0px)
+scale(1);
+
+}
+
+/* OPTION */
+
+.gender-option{
+
+height:54px;
+
+padding:0 16px;
+
+border-radius:14px;
+
+display:flex;
+align-items:center;
+gap:14px;
+
+cursor:pointer;
+
+transition:0.25s ease;
+
+font-size:14px;
+font-weight:500;
+
+color:#2c3e50;
+}
+
+.gender-option:hover{
+
+background:#edf3ff;
+
+transform:translateX(4px);
+}
+
+/* ICONS */
+
+.gender-icon{
+
+width:34px;
+height:34px;
+
+border-radius:50%;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:16px;
+font-weight:700;
+
+color:white;
+}
+
+.male-icon{
+background:#2a7fff;
+}
+
+.female-icon{
+background:#ff5ca8;
+}
+
+.other-icon{
+background:#8e44ad;
+}
+
+/* ================= FILE UPLOAD ================= */
+
+.upload-box{
+
+position:relative;
+
+border:2px dashed #b8c7e3;
+
+border-radius:24px;
+
+padding:34px;
+
+text-align:center;
+
+background:
+linear-gradient(
+145deg,
+#f8fbff,
+#eef5ff
+);
+
+transition:0.3s ease;
+
+cursor:pointer;
+
+overflow:hidden;
+}
+
+.upload-box:hover{
+
+border-color:#2a5298;
+
+transform:translateY(-3px);
+
+box-shadow:
+0 12px 28px rgba(42,82,152,0.12);
+}
+
+.upload-box input{
+
+position:absolute;
+
+width:100%;
+height:100%;
+
+left:0;
+top:0;
+
+opacity:0;
+
+cursor:pointer;
+}
+
+/* ICON */
+
+.upload-icon{
+
+font-size:46px;
+
+margin-bottom:12px;
+}
+
+/* TITLE */
+
+.upload-title{
+
+font-size:16px;
+font-weight:600;
+
+color:#1e3c72;
+
+margin-bottom:6px;
+}
+
+/* SUBTEXT */
+
+.upload-sub{
+
+font-size:13px;
+
+color:#7f8c8d;
+}
+
+/* ================= BUTTON ================= */
+
+.save-btn{
+
+width:100%;
+
+height:60px;
+
+border:none;
+
+border-radius:20px;
+
+background:
+linear-gradient(
+to right,
+#2a5298,
+#1e3c72
+);
+
+color:white;
+
+font-size:15px;
+font-weight:600;
+
+cursor:pointer;
+
+transition:0.3s ease;
+
+margin-top:8px;
+
+box-shadow:
+0 10px 24px rgba(42,82,152,0.20);
+}
+
+.save-btn:hover{
+
+transform:translateY(-3px);
+
+box-shadow:
+0 14px 30px rgba(42,82,152,0.28);
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:768px){
+
+.patient-card{
+
+padding:24px;
+
+border-radius:24px;
+}
+
+.patient-card h2{
+font-size:26px;
+}
+
+}
+
+</style>
+
+<div class="patient-card">
+
+<h2>
+➕ Add New Patient
+</h2>
+
+<form
+method="POST"
+enctype="multipart/form-data"
+class="patient-form"
+>
+
+<!-- FULL NAME -->
+
+<div class="form-group">
+
+<label>
+Full Name
+</label>
+
+<input
+type="text"
+name="name"
+placeholder="Enter patient full name"
+required
+>
+
+</div>
+
+<!-- AGE -->
+
+<div class="form-group">
+
+<label>
+Age
+</label>
+
+<input
+type="number"
+name="age"
+placeholder="Enter age"
+>
+
+</div>
+
+<!-- GENDER -->
+
+<div class="form-group">
+
+<label>
+Gender
+</label>
+
+<div class="custom-gender-select" id="genderSelect">
+
+<div
+class="selected-gender"
+onclick="toggleGenderMenu()"
+>
+
+<span id="selectedGenderText">
+Select Gender
+</span>
+
+<span class="gender-arrow">
+⌄
+</span>
+
+</div>
+
+<!-- OPTIONS -->
+
+<div class="gender-options">
+
+<!-- MALE -->
+
+<div
+class="gender-option"
+onclick="selectGender('Male','Male')"
+>
+
+<div class="gender-icon male-icon">
+♂
+</div>
+
+<span>
+Male
+</span>
+
+</div>
+
+<!-- FEMALE -->
+
+<div
+class="gender-option"
+onclick="selectGender('Female','Female')"
+>
+
+<div class="gender-icon female-icon">
+♀
+</div>
+
+<span>
+Female
+</span>
+
+</div>
+
+<!-- OTHER -->
+
+<div
+class="gender-option"
+onclick="selectGender('Other','Other')"
+>
+
+<div class="gender-icon other-icon">
+•
+</div>
+
+<span>
+Other
+</span>
+
+</div>
+
+</div>
+
+<input
+type="hidden"
+name="gender"
+id="genderInput"
+>
+
+</div>
+
+</div>
+
+<!-- PHONE -->
+
+<div class="form-group">
+
+<label>
+Phone Number
+</label>
+
+<input
+type="text"
+name="phone"
+placeholder="Enter contact number"
+>
+
+</div>
+
+<!-- EMAIL -->
+
+<div class="form-group">
+
+<label>
+Email
+</label>
+
+<input
+type="email"
+name="email"
+placeholder="Enter patient email"
+required
+>
+
+</div>
+
+<!-- DISEASE -->
+
+<div class="form-group">
+
+<label>
+Disease / Diagnosis
+</label>
+
+<input
+type="text"
+name="disease"
+placeholder="Enter disease or condition"
+>
+
+</div>
+
+<!-- BLOOD GROUP -->
+
+<div class="form-group">
+
+<label>
+Blood Group
+</label>
+
+<input
+type="text"
+name="blood_group"
+placeholder="e.g. O+, A-, B+"
+>
+
+</div>
+
+<!-- ADDRESS -->
+
+<div class="form-group">
+
+<label>
+Address
+</label>
+
+<textarea
+name="address"
+rows="4"
+placeholder="Enter full address"
+></textarea>
+
+</div>
+
+<!-- FILE UPLOAD -->
+
+<div class="form-group">
+
+<label>
+Upload Medical Report
+</label>
+
+<label class="upload-box">
+
+<input
+type="file"
+name="report"
+>
+
+<div class="upload-icon">
+📄
+</div>
+
+<div class="upload-title">
+Upload PDF or Image Report
+</div>
+
+<div class="upload-sub">
+Drag & drop or click to browse
+</div>
+
+</label>
+
+</div>
+
+<!-- BUTTON -->
+
+<button
+class="save-btn"
+type="submit"
+>
+
+💾 Save Patient
+
+</button>
+
+</form>
+
+</div>
+
+<script>
+
+/* ================= GENDER SELECTOR ================= */
+
+const genderSelect =
+document.getElementById("genderSelect");
+
+const genderInput =
+document.getElementById("genderInput");
+
+const selectedGenderText =
+document.getElementById("selectedGenderText");
+
+/* TOGGLE */
+
+function toggleGenderMenu(){
+
+genderSelect
+.classList
+.toggle("active");
+
+}
+
+/* SELECT */
+
+function selectGender(value,text){
+
+genderInput.value=value;
+
+selectedGenderText.innerHTML=text;
+
+document
+.querySelector(".selected-gender")
+.classList
+.add("selected");
+
+genderSelect
+.classList
+.remove("active");
+
+}
+
+/* CLOSE OUTSIDE */
+
+window.addEventListener("click",(e)=>{
+
+if(!genderSelect.contains(e.target)){
+
+genderSelect
+.classList
+.remove("active");
+
+}
+
+});
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <h2>👨‍⚕️ Doctor Dashboard</h2>
+
+    <div style="margin-top:20px;">
+
+        <a href="/patients" class="btn btn-view">
+            👥 View Patients
+        </a>
+
+        <a href="/appointments" class="btn btn-view" style="margin-left:15px;">
+            📅 Appointment Requests
+            {% if pending_count > 0 %}
+                <span style="
+                    background:red;
+                    color:white;
+                    padding:4px 8px;
+                    border-radius:50%;
+                    font-size:12px;
+                    margin-left:5px;">
+                    {{ pending_count }}
+                </span>
+            {% endif %}
+        </a>
+
+        <a href="/logout" class="btn btn-delete" style="margin-left:15px;">
+            🚪 Logout
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

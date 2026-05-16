@@ -1,0 +1,486 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card modern-card">
+
+    <h2>✏️ Edit Patient</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+
+        <label>Full Name</label>
+        <input type="text" name="name" value="{{ patient.name }}" required>
+
+        <label>Age</label>
+        <input type="number" name="age" value="{{ patient.age }}">
+
+        <!-- GENDER -->
+
+<label>
+Gender
+</label>
+
+<div class="custom-gender-select" id="genderSelect">
+
+<div
+class="selected-gender selected"
+onclick="toggleGenderMenu()"
+>
+
+<span id="selectedGenderText">
+
+{% if patient.gender %}
+{{ patient.gender }}
+{% else %}
+Select Gender
+{% endif %}
+
+</span>
+
+<span class="gender-arrow">
+⌄
+</span>
+
+</div>
+
+<!-- OPTIONS -->
+
+<div class="gender-options">
+
+<!-- MALE -->
+
+<div
+class="gender-option"
+onclick="selectGender('Male','Male')"
+>
+
+<div class="gender-icon male-icon">
+♂
+</div>
+
+<span>
+Male
+</span>
+
+</div>
+
+<!-- FEMALE -->
+
+<div
+class="gender-option"
+onclick="selectGender('Female','Female')"
+>
+
+<div class="gender-icon female-icon">
+♀
+</div>
+
+<span>
+Female
+</span>
+
+</div>
+
+<!-- OTHER -->
+
+<div
+class="gender-option"
+onclick="selectGender('Other','Other')"
+>
+
+<div class="gender-icon other-icon">
+•
+</div>
+
+<span>
+Other
+</span>
+
+</div>
+
+</div>
+
+<input
+type="hidden"
+name="gender"
+id="genderInput"
+value="{{ patient.gender }}"
+>
+
+</div>
+
+        <label>Phone</label>
+        <input type="text" name="phone" value="{{ patient.phone }}">
+
+        <label>Email</label>
+        <input type="email" name="email" value="{{ patient.email }}">
+
+        <label>Disease</label>
+        <input type="text" name="disease" value="{{ patient.disease }}">
+
+        <label>Blood Group</label>
+        <input type="text" name="blood_group" value="{{ patient.blood_group }}">
+
+        <label>Address</label>
+        <textarea name="address">{{ patient.address }}</textarea>
+
+        <!-- 🔥 REPORT UPLOAD -->
+        <label>Upload Report</label>
+        <input type="file" name="report_file" class="file-input">
+
+        <!-- 🔥 SHOW EXISTING REPORT -->
+        {% if patient.report %}
+            <p class="report-link">
+                📄 Current Report:
+                <a href="/uploads/{{ patient.report }}" target="_blank">View Report</a>
+            </p>
+        {% endif %}
+
+        <br>
+
+        <button class="btn btn-edit" type="submit">Update Patient</button>
+
+    </form>
+
+</div>
+
+<style>
+
+/* ===== CARD STYLE ===== */
+.modern-card {
+    max-width: 600px;
+    margin: auto;
+    padding: 25px;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    animation: fadeSlide 0.5s ease;
+}
+
+/* Animation */
+@keyframes fadeSlide {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Labels */
+label {
+    font-weight: 600;
+    margin-top: 10px;
+    display: block;
+}
+
+/* Inputs */
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    transition: 0.3s;
+}
+
+/* Focus effect */
+input:focus, select:focus, textarea:focus {
+    border-color: #4CAF50;
+    box-shadow: 0 0 10px rgba(76,175,80,0.2);
+    outline: none;
+}
+
+/* File input */
+.file-input {
+    background: #f9f9f9;
+    padding: 8px;
+}
+
+/* Button */
+.btn-edit {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #4CAF50, #2e7d32);
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* Button hover */
+.btn-edit:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* Report link */
+.report-link a {
+    color: #2196F3;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.report-link a:hover {
+    text-decoration: underline;
+}
+
+/* ================= CUSTOM GENDER SELECT ================= */
+
+.custom-gender-select{
+position:relative;
+margin-top:6px;
+}
+
+/* MAIN SELECT */
+
+.selected-gender{
+
+height:56px;
+
+padding:0 18px;
+
+border-radius:16px;
+
+background:
+linear-gradient(
+145deg,
+#ffffff,
+#f4f8ff
+);
+
+border:1px solid #dce3ef;
+
+display:flex;
+align-items:center;
+justify-content:space-between;
+
+cursor:pointer;
+
+transition:0.35s ease;
+
+box-shadow:
+0 8px 22px rgba(0,0,0,0.05);
+
+font-size:14px;
+font-weight:500;
+
+color:#7f8c8d;
+}
+
+/* ACTIVE TEXT */
+
+.selected-gender.selected{
+color:#2c3e50;
+}
+
+/* HOVER */
+
+.selected-gender:hover{
+
+transform:translateY(-2px);
+
+border-color:#4CAF50;
+
+box-shadow:
+0 12px 28px rgba(76,175,80,0.12);
+}
+
+/* ACTIVE */
+
+.custom-gender-select.active .selected-gender{
+
+border-color:#4CAF50;
+
+box-shadow:
+0 0 0 4px rgba(76,175,80,0.10),
+0 12px 30px rgba(76,175,80,0.12);
+}
+
+/* ARROW */
+
+.gender-arrow{
+
+font-size:18px;
+
+color:#4CAF50;
+
+transition:0.3s ease;
+}
+
+.custom-gender-select.active .gender-arrow{
+
+transform:rotate(180deg);
+
+}
+
+/* DROPDOWN */
+
+.gender-options{
+
+position:absolute;
+
+top:66px;
+left:0;
+
+width:100%;
+
+background:white;
+
+border-radius:18px;
+
+padding:10px;
+
+opacity:0;
+visibility:hidden;
+
+transform:
+translateY(-10px)
+scale(0.96);
+
+transition:0.35s ease;
+
+box-shadow:
+0 18px 35px rgba(0,0,0,0.12);
+
+z-index:100;
+}
+
+/* SHOW */
+
+.custom-gender-select.active .gender-options{
+
+opacity:1;
+visibility:visible;
+
+transform:
+translateY(0px)
+scale(1);
+
+}
+
+/* OPTION */
+
+.gender-option{
+
+height:52px;
+
+padding:0 16px;
+
+border-radius:14px;
+
+display:flex;
+align-items:center;
+gap:14px;
+
+cursor:pointer;
+
+transition:0.25s ease;
+
+font-size:14px;
+font-weight:500;
+}
+
+.gender-option:hover{
+
+background:#edf8ef;
+
+transform:translateX(4px);
+
+}
+
+/* ICONS */
+
+.gender-icon{
+
+width:34px;
+height:34px;
+
+border-radius:50%;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:16px;
+font-weight:700;
+
+color:white;
+}
+
+.male-icon{
+background:#2a7fff;
+}
+
+.female-icon{
+background:#ff5ca8;
+}
+
+.other-icon{
+background:#8e44ad;
+}
+
+</style>
+
+<script>
+
+/* GENDER SELECTOR */
+
+const genderSelect =
+document.getElementById("genderSelect");
+
+const genderInput =
+document.getElementById("genderInput");
+
+const selectedGenderText =
+document.getElementById("selectedGenderText");
+
+/* TOGGLE */
+
+function toggleGenderMenu(){
+
+genderSelect
+.classList
+.toggle("active");
+
+}
+
+/* SELECT */
+
+function selectGender(value,text){
+
+genderInput.value=value;
+
+selectedGenderText.innerHTML=text;
+
+document
+.querySelector(".selected-gender")
+.classList
+.add("selected");
+
+genderSelect
+.classList
+.remove("active");
+
+}
+
+/* CLOSE OUTSIDE */
+
+window.addEventListener("click",(e)=>{
+
+if(!genderSelect.contains(e.target)){
+
+genderSelect
+.classList
+.remove("active");
+
+}
+
+});
+
+</script>
+
+{% endblock %}
