@@ -22,8 +22,9 @@ def send_email(to_email, subject, message):
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
             smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
             smtp.send_message(msg)
+        print(f"✅ Asynchronous email successfully dispatched to {to_email}")
     except Exception as e:
-        print(f"Failed to send email to {to_email}: {e}")
+        print(f"❌ Failed to send email to {to_email}: {e}")
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -63,7 +64,7 @@ def login():
         password = request.form["password"]
         role = request.form["role"]
 
-        conn = sqlite3.connect(DATABASE)
+        conn = sqlite3.connect(DATABASE, timeout=20)
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
 
@@ -107,7 +108,7 @@ def register_doctor():
         clinic = request.form["clinic"]
         address = request.form["address"]
 
-        conn = sqlite3.connect(DATABASE)
+        conn = sqlite3.connect(DATABASE, timeout=20)
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
 
@@ -144,7 +145,7 @@ def dashboard():
     if not is_logged_in() or session.get("role") != "admin":
         return redirect("/login")
 
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, timeout=20)
     conn.row_factory = sqlite3.Row   
     cur = conn.cursor()
 
@@ -199,7 +200,7 @@ def add_patient():
         address = request.form["address"]
         doctor_id = session["doctor_id"]
 
-        conn = sqlite3.connect(DATABASE)
+        conn = sqlite3.connect(DATABASE, timeout=20)
         cur = conn.cursor()
 
         cur.execute("""
@@ -209,7 +210,6 @@ def add_patient():
         
         patient_id = cur.lastrowid
 
-        # Multi-file saving logic for Add Patient
         files = request.files.getlist("reports[]")
         names = request.form.getlist("report_names[]")
 
@@ -240,7 +240,7 @@ def view_patients():
 
     search = request.args.get("search")
 
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, timeout=20)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     doctor_id = session["doctor_id"]
@@ -263,7 +263,7 @@ def edit_patient(patient_id):
     if not is_logged_in() or session.get("role") != "admin":
         return redirect("/login")
 
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, timeout=20)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
@@ -280,14 +280,12 @@ def edit_patient(patient_id):
         blood_group = request.form["blood_group"]
         address = request.form["address"]
 
-        # 1. Update basic core patient metrics
         cur.execute("""
             UPDATE patients
             SET name=?, age=?, gender=?, phone=?, email=?, disease=?, blood_group=?, address=?
             WHERE id=?
         """, (name, age, gender, phone, email, disease, blood_group, address, patient_id))
 
-        # 2. Process and append multiple medical reports from edit page
         files = request.files.getlist("reports[]")
         names = request.form.getlist("report_names[]")
 
@@ -317,7 +315,7 @@ def delete_patient(patient_id):
     if not is_logged_in() or session.get("role") != "admin":
         return redirect("/login")
 
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, timeout=20)
     cur = conn.cursor()
     cur.execute("DELETE FROM patients WHERE id=?", (patient_id,))
     conn.commit()
@@ -332,7 +330,7 @@ def patient_profile(id):
     if not is_logged_in():
         return redirect("/login")
 
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, timeout=20)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
@@ -398,31 +396,22 @@ def patient_dashboard():
         return redirect("/login")
 
     patient_id = session.get("patient_id")
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row  # Added Row mapping factory to safely extract elements by column text names
+    conn = sqlite3.connect(DATABASE, timeout=20)
+    conn.row_factory = sqlite3.Row  
     cur = conn.cursor()
 
-    # 1. Fetch Patient profile data
     cur.execute("SELECT * FROM patients WHERE id=?", (patient_id,))
     patient = cur.fetchone()
 
-    # 2. Fetch past medical clinic checkup records
     cur.execute("SELECT * FROM visits WHERE patient_id=? ORDER BY visit_date DESC", (patient_id,))
     visits = cur.fetchall()
 
-    # 3. Fetch active medications assigned to this patient
     cur.execute("SELECT * FROM medicines WHERE patient_id=?", (patient_id,))
     medicines = cur.fetchall()
 
-    # 4. FIX: Fetch uploaded files from patient_reports table so patient can see them
-    cur.execute("""
-        SELECT * FROM patient_reports 
-        WHERE patient_id=? 
-        ORDER BY uploaded_at DESC
-    """, (patient_id,))
+    cur.execute("SELECT * FROM patient_reports WHERE patient_id=? ORDER BY uploaded_at DESC", (patient_id,))
     reports = cur.fetchall()
 
-    # 5. Process medicine alerts safely using explicit string dictionary indexes
     medicine_alerts = []
     today = datetime.today()
     for med in medicines:
@@ -446,19 +435,17 @@ def patient_dashboard():
         except Exception as e:
             print(f"Error calculating alerts for {med['medicine_name']}: {e}")
 
-    # 6. Fetch patient appointments overview listing
     cur.execute("SELECT * FROM appointments WHERE patient_id=? ORDER BY id DESC", (patient_id,))
     appointments = cur.fetchall()
     
     conn.close()
 
-    # Render template with variables mapping to HTML template names
     return render_template(
         "patient_dashboard.html",
         patient=patient,
         visits=visits,
-        medicines=medicines,       # Passed as 'medicines' to power counts and grid systems
-        reports=reports,           # Passed to populate the clinical lab reports system view
+        medicines=medicines,       
+        reports=reports,          
         medicine_alerts=medicine_alerts,
         appointments=appointments
     )
@@ -471,7 +458,6 @@ def request_appointment():
 
     patient_id = session.get("patient_id")
     
-    # Added timeout=20 to prevent SQLite database locking on Render
     conn = sqlite3.connect(DATABASE, timeout=20)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
@@ -494,8 +480,6 @@ def request_appointment():
         subject = "Appointment Request Received"
         message = f"Hello {patient_name},\n\nYour appointment request for {requested_date} has been received.\n\nThank you!"
 
-        # 🔥 NON-BLOCKING BACKGROUND EMAIL THREAD
-        # Instead of making the phone wait for the network, this fires the email instantly in the background.
         if patient_email and "@" in patient_email:
             try:
                 email_worker = threading.Thread(
@@ -520,7 +504,7 @@ def view_appointments():
         return redirect("/login")
 
     doctor_id = session.get("doctor_id")
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, timeout=20)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
@@ -532,14 +516,15 @@ def view_appointments():
 # ---------------- APPROVE APPOINTMENT ----------------
 @app.route("/approve_appointment/<int:id>")
 def approve_appointment(id):
-    if not is_logged_in() or session.get("role") != "doctor":
+    # FIXED: Check role against 'admin' to match the doctor session login rules
+    if not is_logged_in() or session.get("role") != "admin":
         return redirect("/login")
 
     conn = sqlite3.connect(DATABASE, timeout=20)
-    conn.row_factory = sqlite3.Row # Crucial to fetch by column name keys!
+    conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     
-    # FETCH PATIENT DETAILS AND REQUESTED DATE BEFORE SENDING EMAIL
+    # FIXED: Added SQL Join to grab variables inside the local route block safely
     cur.execute("""
         SELECT a.requested_date, p.name, p.email 
         FROM appointments a 
@@ -548,7 +533,6 @@ def approve_appointment(id):
     """, (id,))
     appointment_data = cur.fetchone()
 
-    # Update status to approved
     cur.execute("UPDATE appointments SET status='approved' WHERE id=?", (id,))
     conn.commit()
 
@@ -557,7 +541,6 @@ def approve_appointment(id):
         patient_name = appointment_data["name"]
         requested_date = appointment_data["requested_date"]
 
-        # 🔥 NON-BLOCKING BACKGROUND EMAIL THREAD
         subject = "Appointment Confirmed!"
         message = f"Hello {patient_name},\n\nYour appointment request for {requested_date} has been officially APPROVED by the doctor."
 
@@ -575,18 +558,18 @@ def approve_appointment(id):
     conn.close()
     return redirect("/appointments")
 
-
 # ---------------- REJECT APPOINTMENT ----------------
 @app.route("/reject_appointment/<int:id>")
 def reject_appointment(id):
-    if not is_logged_in() or session.get("role") != "doctor":
+    # FIXED: Check role against 'admin' to match the doctor session login rules
+    if not is_logged_in() or session.get("role") != "admin":
         return redirect("/login")
 
     conn = sqlite3.connect(DATABASE, timeout=20)
-    conn.row_factory = sqlite3.Row # Crucial to fetch by column name keys!
+    conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     
-    # FETCH PATIENT DETAILS BEFORE SENDING EMAIL
+    # FIXED: Added SQL Join to grab variables inside the local route block safely
     cur.execute("""
         SELECT p.name, p.email 
         FROM appointments a 
@@ -595,7 +578,6 @@ def reject_appointment(id):
     """, (id,))
     appointment_data = cur.fetchone()
 
-    # Update status to rejected
     cur.execute("UPDATE appointments SET status='rejected' WHERE id=?", (id,))
     conn.commit()
 
@@ -603,7 +585,6 @@ def reject_appointment(id):
         patient_email = appointment_data["email"]
         patient_name = appointment_data["name"]
 
-        # 🔥 NON-BLOCKING BACKGROUND EMAIL THREAD
         subject = "Appointment Update"
         message = f"Hello {patient_name},\n\nWe regret to inform you that your appointment request could not be accommodated at this time."
 
@@ -621,7 +602,6 @@ def reject_appointment(id):
     conn.close()
     return redirect("/appointments")
 
-
 # ---------------- APPOINTMENT CALENDAR PAGE ----------------
 @app.route("/appointment_calendar")
 def appointment_calendar():
@@ -636,7 +616,7 @@ def appointment_calendar_data():
         return redirect("/login")
 
     doctor_id = session.get("doctor_id")
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, timeout=20)
     cur = conn.cursor()
 
     cur.execute("""
@@ -665,7 +645,7 @@ def appointments_by_date():
     date = request.args.get("date")
     doctor_id = session.get("doctor_id")
 
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, timeout=20)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
@@ -690,7 +670,7 @@ def add_medicine(patient_id):
     quantity = request.form["quantity"]
     start_date = request.form["start_date"]
 
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, timeout=20)
     cur = conn.cursor()
     cur.execute("""
         INSERT INTO medicines (patient_id, medicine_name, dosage, times_per_day, total_days, quantity, start_date, reminder_sent)
@@ -708,7 +688,7 @@ def add_visit(patient_id):
     diagnosis = request.form["diagnosis"]
     prescription = request.form["prescription"]
 
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, timeout=20)
     cur = conn.cursor()
     cur.execute("""
         INSERT INTO visits (patient_id, visit_date, diagnosis, prescription)
@@ -721,8 +701,8 @@ def add_visit(patient_id):
 
 # ---------------- Medicine Refill Reminder EMAIL -------------------
 def check_medicine_refills():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row  # Crucial for reading table variables by column name strings
+    conn = sqlite3.connect(DATABASE, timeout=20)
+    conn.row_factory = sqlite3.Row  
     cur = conn.cursor()
 
     today = datetime.now().date()
@@ -737,70 +717,34 @@ def check_medicine_refills():
 
     for med in medicines:
         try:
-            # Parse the text date into a workable Python date object
             start_date = datetime.strptime(med["start_date"], "%Y-%m-%d").date()
-            
-            # Safely calculate the cycle end date based on treatment course duration
             duration_days = int(med["total_days"]) if med["total_days"] else 0
             end_date = start_date + timedelta(days=duration_days)
-            
             days_left = (end_date - today).days
 
             print(f"Background Verification Tracker: {med['medicine_name']} | Days remaining: {days_left}")
 
-            # Safe extraction of the reminder state tracker
             is_reminder_sent = med["reminder_sent"] if med["reminder_sent"] is not None else 0
 
-            # -------- 1. PRESCRIPTION COURSE ENDING SOON (0 to 3 Days Remaining) --------
             if 0 <= days_left <= 3 and is_reminder_sent == 0:
                 subject = "Prescription Course Concluding Soon"
-
-                message = f"""Hello {med['patient_name']},
-
-This is an automated reminder that your prescribed course for "{med['medicine_name']}" will conclude in {days_left} day(s).
-
-If your symptoms persist or if your healthcare provider advised a continuation, please contact the clinic to organize a follow-up consultation or refill authorization.
-
-Track your complete profile details here:
-http://127.0.0.1:5000/patient_auto_login/{med['patient_id']}
-
-Thank you,
-Digital Medical Record System"""
+                # FIXED: Stripped out broken 127.0.0.1 hardcoded string pointers for live production
+                message = f"Hello {med['patient_name']},\n\nThis is an automated reminder that your prescribed course for '{med['medicine_name']}' will conclude in {days_left} day(s).\n\nPlease open your portal application dashboard to check your schedule status configuration updates.\n\nThank you,\nDigital Medical Record System"
 
                 if med["email"] and "@" in med["email"]:
                     send_email(med["email"], subject, message)
 
-                # Set reminder status to 1 so the system stops emailing them every minute
-                cur.execute(
-                    "UPDATE medicines SET reminder_sent = 1 WHERE id = ?",
-                    (med["id"],)
-                )
+                cur.execute("UPDATE medicines SET reminder_sent = 1 WHERE id = ?", (med["id"],))
                 conn.commit()
 
-            # -------- 2. PRESCRIPTION COURSE OFFICIALLY COMPLETED --------
             elif days_left < 0 and is_reminder_sent == 1:
                 subject = "Prescription Medication Course Completed"
-
-                message = f"""Hello {med['patient_name']},
-
-Your prescribed treatment schedule for "{med['medicine_name']}" has officially ended. 
-
-Please stop taking this medication as directed by your schedule unless explicitly instructed otherwise by your doctor. If you require further clinical evaluations, please schedule a new appointment through your medical portal.
-
-Access your portal dashboard here:
-http://127.0.0.1:5000/patient_auto_login/{med['patient_id']}
-
-Thank you,
-Digital Medical Record System"""
+                message = f"Hello {med['patient_name']},\n\nYour prescribed treatment schedule for '{med['medicine_name']}' has officially ended.\n\nPlease stop taking this medication as directed by your schedule unless explicitly instructed otherwise by your doctor.\n\nThank you,\nDigital Medical Record System"
 
                 if med["email"] and "@" in med["email"]:
                     send_email(med["email"], subject, message)
                 
-                # Set status to 2 so compl..etion notifications don't loop endlessly
-                cur.execute(
-                    "UPDATE medicines SET reminder_sent = 2 WHERE id = ?",
-                    (med["id"],)
-                )
+                cur.execute("UPDATE medicines SET reminder_sent = 2 WHERE id = ?", (med["id"],))
                 conn.commit()
 
         except Exception as e:
@@ -810,7 +754,7 @@ Digital Medical Record System"""
 
 @app.route("/patient_auto_login/<int:patient_id>")
 def patient_auto_login(patient_id):
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, timeout=20)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     cur.execute("SELECT * FROM patients WHERE id=?", (patient_id,))
@@ -829,7 +773,7 @@ def upload_reports(patient_id):
     files = request.files.getlist("reports[]")
     names = request.form.getlist("report_names[]")
 
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, timeout=20)
     cur = conn.cursor()
     for i, file in enumerate(files):
         if file and file.filename:
@@ -845,22 +789,13 @@ def upload_reports(patient_id):
 # ---------------- Scheduler Configuration ----------------
 def run_scheduler():
     print("🚀 Background scheduler thread initialized successfully...")
-    
-    # ==========================================================
-    # 🧪 TESTING MODE: Triggers the check function every 1 minute
-    # ==========================================================
-    # schedule.every(1).minutes.do(check_medicine_refills)
-
-    
     schedule.every().day.at("09:00").do(check_medicine_refills)
     schedule.every().day.at("20:00").do(check_medicine_refills)
 
-    # SINGLE INFINITE LOOP TO RUN PENDING TASKS
     while True:
         schedule.run_pending()
-        time.sleep(1)  # Keeps checking optimized tasks smoothly every second
+        time.sleep(1)
 
-# Start the background thread securely
 threading.Thread(target=run_scheduler, daemon=True).start()
 
 if __name__ == "__main__":
