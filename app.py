@@ -486,9 +486,8 @@ def request_appointment():
         message = f"Hello {patient_name},\n\nYour appointment request for {requested_date} has been received successfully.\n\nThank you!"
 
         if patient_email and "@" in str(patient_email):
-            t = threading.Thread(target=send_email, args=(patient_email, subject, message))
-            t.daemon = True
-            t.start()
+            # Process directly in-line to bypass Render thread termination limits
+            send_email(patient_email, subject, message)
 
         flash("Appointment requested successfully!")
         conn.close()
@@ -496,6 +495,7 @@ def request_appointment():
 
     conn.close()
     return render_template("request_appointment.html", patient=patient)
+
 
 # ---------------- VIEW APPOINTMENTS ----------------
 @app.route("/appointments")
@@ -505,10 +505,18 @@ def view_appointments():
 
     doctor_id = session.get("doctor_id")
     conn = sqlite3.connect(DATABASE, timeout=20)
-    conn.row_factory = sqlite3.Row
+    
+    # CRITICAL: Do NOT use row_factory = sqlite3.Row if your template expects 
+    # tuple indices like app[0], app[1], app[3], app[4], app[5]
     cur = conn.cursor()
 
-    cur.execute("SELECT * FROM appointments WHERE doctor_id=? ORDER BY id DESC", (doctor_id,))
+    # Matches database index lookup mapping used in appointments.html template
+    cur.execute("""
+        SELECT id, patient_id, doctor_id, patient_name, requested_date, status 
+        FROM appointments 
+        WHERE doctor_id=? 
+        ORDER BY id DESC
+    """, (doctor_id,))
     appointments = cur.fetchall()
     conn.close()
     return render_template("appointments.html", appointments=appointments)
@@ -543,9 +551,8 @@ def approve_appointment(id):
         message = f"Hello {patient_name},\n\nYour appointment request for {requested_date} has been approved successfully."
 
         if patient_email and "@" in str(patient_email):
-            t = threading.Thread(target=send_email, args=(patient_email, subject, message))
-            t.daemon = True
-            t.start()
+            # Process directly in-line to prevent Render thread lifecycle cutoff
+            send_email(patient_email, subject, message)
 
     flash("Appointment approved successfully!")
     conn.close()
@@ -577,10 +584,8 @@ def reject_appointment(id):
         patient_name = appointment_data["name"]
         patient_id = appointment_data["patient_db_id"]
 
-        # Dynamically build the auto-login dashboard redirect link
-        # request.host_url automatically switches between localhost and your live Render domain
+        # Dynamically build the absolute auto-login return loop path 
         direct_link = f"{request.host_url.rstrip('/')}/patient_auto_login/{patient_id}"
-
         subject = "Appointment Request Update - Rejected"
         
         message = (
@@ -591,11 +596,9 @@ def reject_appointment(id):
             f"Thank you,\nClinical Administration"
         )
 
-        print(f"👉 [EMAIL TRACKER] Outbound rejection auto-link dispatch to: {patient_email}")
         if patient_email and "@" in str(patient_email):
-            t = threading.Thread(target=send_email, args=(patient_email, subject, message))
-            t.daemon = True
-            t.start()
+            # Inline processing ensures network delivery succeeds on mobile and web viewports
+            send_email(patient_email, subject, message)
 
     flash("Appointment rejected.")
     conn.close()
