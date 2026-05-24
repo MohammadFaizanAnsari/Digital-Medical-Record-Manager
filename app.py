@@ -470,7 +470,9 @@ def request_appointment():
         return redirect("/login")
 
     patient_id = session.get("patient_id")
-    conn = sqlite3.connect(DATABASE)
+    
+    # Added timeout=20 to prevent SQLite database locking on Render
+    conn = sqlite3.connect(DATABASE, timeout=20)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
@@ -492,8 +494,17 @@ def request_appointment():
         subject = "Appointment Request Received"
         message = f"Hello {patient_name},\n\nYour appointment request for {requested_date} has been received.\n\nThank you!"
 
+        # 🔥 NON-BLOCKING BACKGROUND EMAIL THREAD
+        # Instead of making the phone wait for the network, this fires the email instantly in the background.
         if patient_email and "@" in patient_email:
-            send_email(patient_email, subject, message)
+            try:
+                email_worker = threading.Thread(
+                    target=send_email, 
+                    args=(patient_email, subject, message)
+                )
+                email_worker.start()
+            except Exception as e:
+                print(f"⚠️ Error launching background email thread: {e}")
 
         flash("Appointment requested successfully!")
         conn.close()
@@ -519,58 +530,97 @@ def view_appointments():
     return render_template("appointments.html", appointments=appointments)
 
 # ---------------- APPROVE APPOINTMENT ----------------
-@app.route("/appointments/<int:id>/approve", methods=["POST"])
+@app.route("/approve_appointment/<int:id>")
 def approve_appointment(id):
-    if not is_logged_in() or session.get("role") != "admin":
+    if not is_logged_in() or session.get("role") != "doctor":
         return redirect("/login")
 
-    doctor_id = session.get("doctor_id")
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
+    conn = sqlite3.connect(DATABASE, timeout=20)
+    conn.row_factory = sqlite3.Row # Crucial to fetch by column name keys!
     cur = conn.cursor()
+    
+    # FETCH PATIENT DETAILS AND REQUESTED DATE BEFORE SENDING EMAIL
+    cur.execute("""
+        SELECT a.requested_date, p.name, p.email 
+        FROM appointments a 
+        JOIN patients p ON a.patient_id = p.id 
+        WHERE a.id = ?
+    """, (id,))
+    appointment_data = cur.fetchone()
 
-    cur.execute("SELECT * FROM appointments WHERE id=? AND doctor_id=?", (id, doctor_id))
-    appointment = cur.fetchone()
+    # Update status to approved
+    cur.execute("UPDATE appointments SET status='approved' WHERE id=?", (id,))
+    conn.commit()
 
-    if appointment:
-        cur.execute("UPDATE appointments SET status='approved' WHERE id=?", (id,))
-        cur.execute("SELECT name, email FROM patients WHERE id=?", (appointment["patient_id"],))
-        patient = cur.fetchone()
-        conn.commit()
-        
-        if patient and patient["email"]:
-            send_email(patient["email"], "Appointment Approved", f"Hello {patient['name']},\n\nYour appointment request has been approved.")
-            
+    if appointment_data:
+        patient_email = appointment_data["email"]
+        patient_name = appointment_data["name"]
+        requested_date = appointment_data["requested_date"]
+
+        # 🔥 NON-BLOCKING BACKGROUND EMAIL THREAD
+        subject = "Appointment Confirmed!"
+        message = f"Hello {patient_name},\n\nYour appointment request for {requested_date} has been officially APPROVED by the doctor."
+
+        if patient_email and "@" in patient_email:
+            try:
+                email_worker = threading.Thread(
+                    target=send_email, 
+                    args=(patient_email, subject, message)
+                )
+                email_worker.start()
+            except Exception as e:
+                print(f"⚠️ Error launching background email thread: {e}")
+
+    flash("Appointment approved successfully!")
     conn.close()
-    flash("Appointment approved!")
     return redirect("/appointments")
+
 
 # ---------------- REJECT APPOINTMENT ----------------
-@app.route("/appointments/<int:id>/reject", methods=["POST"])
+@app.route("/reject_appointment/<int:id>")
 def reject_appointment(id):
-    if not is_logged_in() or session.get("role") != "admin":
+    if not is_logged_in() or session.get("role") != "doctor":
         return redirect("/login")
 
-    doctor_id = session.get("doctor_id")
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
+    conn = sqlite3.connect(DATABASE, timeout=20)
+    conn.row_factory = sqlite3.Row # Crucial to fetch by column name keys!
     cur = conn.cursor()
+    
+    # FETCH PATIENT DETAILS BEFORE SENDING EMAIL
+    cur.execute("""
+        SELECT p.name, p.email 
+        FROM appointments a 
+        JOIN patients p ON a.patient_id = p.id 
+        WHERE a.id = ?
+    """, (id,))
+    appointment_data = cur.fetchone()
 
-    cur.execute("SELECT * FROM appointments WHERE id=? AND doctor_id=?", (id, doctor_id))
-    appointment = cur.fetchone()
+    # Update status to rejected
+    cur.execute("UPDATE appointments SET status='rejected' WHERE id=?", (id,))
+    conn.commit()
 
-    if appointment:
-        cur.execute("UPDATE appointments SET status='rejected' WHERE id=?", (id,))
-        cur.execute("SELECT name, email FROM patients WHERE id=?", (appointment["patient_id"],))
-        patient = cur.fetchone()
-        conn.commit()
-        
-        if patient and patient["email"]:
-            send_email(patient["email"], "Appointment Rejected", f"Hello {patient['name']},\n\nYour appointment request has been rejected.")
-            
-    conn.close()
+    if appointment_data:
+        patient_email = appointment_data["email"]
+        patient_name = appointment_data["name"]
+
+        # 🔥 NON-BLOCKING BACKGROUND EMAIL THREAD
+        subject = "Appointment Update"
+        message = f"Hello {patient_name},\n\nWe regret to inform you that your appointment request could not be accommodated at this time."
+
+        if patient_email and "@" in patient_email:
+            try:
+                email_worker = threading.Thread(
+                    target=send_email, 
+                    args=(patient_email, subject, message)
+                )
+                email_worker.start()
+            except Exception as e:
+                print(f"⚠️ Error launching background email thread: {e}")
+
     flash("Appointment rejected.")
+    conn.close()
     return redirect("/appointments")
+
 
 # ---------------- APPOINTMENT CALENDAR PAGE ----------------
 @app.route("/appointment_calendar")
