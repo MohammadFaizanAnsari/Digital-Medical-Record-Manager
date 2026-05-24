@@ -1,486 +1,318 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="card modern-card">
+<link
+rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+/>
 
-    <h2>✏️ Edit Patient</h2>
+<div class="edit-page">
 
-    <form method="POST" enctype="multipart/form-data">
+    <div class="page-header">
+        <div class="header-left">
+            <div class="header-icon">
+                <i class="fa-solid fa-user-pen"></i>
+            </div>
+            <div>
+                <h1>Edit Patient</h1>
+                <p>Update patient information and medical reports</p>
+            </div>
+        </div>
+    </div>
 
-        <label>Full Name</label>
-        <input type="text" name="name" value="{{ patient.name }}" required>
-
-        <label>Age</label>
-        <input type="number" name="age" value="{{ patient.age }}">
-
-        <!-- GENDER -->
-
-<label>
-Gender
-</label>
-
-<div class="custom-gender-select" id="genderSelect">
-
-<div
-class="selected-gender selected"
-onclick="toggleGenderMenu()"
->
-
-<span id="selectedGenderText">
-
-{% if patient.gender %}
-{{ patient.gender }}
-{% else %}
-Select Gender
-{% endif %}
-
-</span>
-
-<span class="gender-arrow">
-⌄
-</span>
-
-</div>
-
-<!-- OPTIONS -->
-
-<div class="gender-options">
-
-<!-- MALE -->
-
-<div
-class="gender-option"
-onclick="selectGender('Male','Male')"
->
-
-<div class="gender-icon male-icon">
-♂
-</div>
-
-<span>
-Male
-</span>
-
-</div>
-
-<!-- FEMALE -->
-
-<div
-class="gender-option"
-onclick="selectGender('Female','Female')"
->
-
-<div class="gender-icon female-icon">
-♀
-</div>
-
-<span>
-Female
-</span>
-
-</div>
-
-<!-- OTHER -->
-
-<div
-class="gender-option"
-onclick="selectGender('Other','Other')"
->
-
-<div class="gender-icon other-icon">
-•
-</div>
-
-<span>
-Other
-</span>
-
-</div>
-
-</div>
-
-<input
-type="hidden"
-name="gender"
-id="genderInput"
-value="{{ patient.gender }}"
->
-
-</div>
-
-        <label>Phone</label>
-        <input type="text" name="phone" value="{{ patient.phone }}">
-
-        <label>Email</label>
-        <input type="email" name="email" value="{{ patient.email }}">
-
-        <label>Disease</label>
-        <input type="text" name="disease" value="{{ patient.disease }}">
-
-        <label>Blood Group</label>
-        <input type="text" name="blood_group" value="{{ patient.blood_group }}">
-
-        <label>Address</label>
-        <textarea name="address">{{ patient.address }}</textarea>
-
-        <!-- 🔥 REPORT UPLOAD -->
-        <label>Upload Report</label>
-        <input type="file" name="report_file" class="file-input">
-
-        <!-- 🔥 SHOW EXISTING REPORT -->
-        {% if patient.report %}
-            <p class="report-link">
-                📄 Current Report:
-                <a href="/uploads/{{ patient.report }}" target="_blank">View Report</a>
-            </p>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="success-alert">
+                <i class="fa-solid fa-circle-check"></i>
+                {{ messages[0] }}
+            </div>
         {% endif %}
+    {% endwith %}
 
-        <br>
+    <div class="modern-card">
+        <form method="POST" enctype="multipart/form-data">
 
-        <button class="btn btn-edit" type="submit">Update Patient</button>
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <div class="input-box">
+                        <i class="fa-solid fa-user input-icon"></i>
+                        <input type="text" name="name" value="{{ patient.name }}" required>
+                    </div>
+                </div>
 
-    </form>
+                <div class="input-group">
+                    <label>Age</label>
+                    <div class="input-box">
+                        <i class="fa-solid fa-cake-candles input-icon"></i>
+                        <input type="number" name="age" value="{{ patient.age }}">
+                    </div>
+                </div>
+            </div>
 
+            <div class="input-group">
+                <label>Gender</label>
+                <div class="custom-gender-select" id="genderSelect">
+                    <div class="selected-gender" onclick="toggleGenderMenu()">
+                        <span id="selectedGenderText">
+                            {% if patient.gender %}{{ patient.gender }}{% else %}Select Gender{% endif %}
+                        </span>
+                        <i class="fa-solid fa-chevron-down gender-arrow"></i>
+                    </div>
+
+                    <div class="gender-options">
+                        <div class="gender-option" onclick="selectGender('Male')">
+                            <div class="gender-icon male-icon"><i class="fa-solid fa-mars"></i></div>
+                            <span>Male</span>
+                        </div>
+                        <div class="gender-option" onclick="selectGender('Female')">
+                            <div class="gender-icon female-icon"><i class="fa-solid fa-venus"></i></div>
+                            <span>Female</span>
+                        </div>
+                        <div class="gender-option" onclick="selectGender('Other')">
+                            <div class="gender-icon other-icon"><i class="fa-solid fa-user"></i></div>
+                            <span>Other</span>
+                        </div>
+                    </div>
+                    <input type="hidden" name="gender" id="genderInput" value="{{ patient.gender }}">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Phone Number</label>
+                    <div class="input-box">
+                        <i class="fa-solid fa-phone input-icon"></i>
+                        <input type="text" name="phone" value="{{ patient.phone }}">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <div class="input-box">
+                        <i class="fa-solid fa-envelope input-icon"></i>
+                        <input type="email" name="email" value="{{ patient.email }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Diagnosed Disease</label>
+                    <div class="input-box">
+                        <i class="fa-solid fa-stethoscope input-icon"></i>
+                        <input type="text" name="disease" value="{{ patient.disease }}">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Blood Group</label>
+                    <div class="input-box">
+                        <i class="fa-solid fa-droplet input-icon"></i>
+                        <input type="text" name="blood_group" value="{{ patient.blood_group }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Home Address</label>
+                <div class="textarea-box">
+                    <textarea name="address">{{ patient.address }}</textarea>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <div class="report-header">
+                    <div class="report-icon"><i class="fa-solid fa-file-medical"></i></div>
+                    <div>
+                        <h3>Add Medical Files</h3>
+                        <p>Upload files to append new records</p>
+                    </div>
+                </div>
+
+                <div id="reportContainer">
+                    <div class="report-item">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label>Report Document Label</label>
+                                <div class="input-box">
+                                    <i class="fa-solid fa-file-lines input-icon"></i>
+                                    <input type="text" name="report_names[]" placeholder="Example: Blood Panel Report">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>Upload Document File</label>
+                                <label class="upload-box">
+                                    <div class="upload-left">
+                                        <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                                        <div>
+                                            <span class="upload-title">Choose File</span>
+                                            <small>PDF, JPG, PNG supported</small>
+                                        </div>
+                                    </div>
+                                    <div class="upload-btn">Browse</div>
+                                    <input type="file" name="reports[]" class="hidden-file" onchange="updateFileNameDisplay(this)">
+                                </label>
+                                <div class="file-chosen-name" style="margin-top:5px; color:#1976d2; font-size:13px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="add-more-btn" onclick="addReportField()">
+                    <i class="fa-solid fa-plus"></i> Add Another Document Field
+                </button>
+
+                {% if reports %}
+                <div class="existing-report-list" style="margin-top: 25px;">
+                    <h4 style="color:#163b70; margin-bottom:15px;">Currently Active Attachments</h4>
+                    {% for report in reports %}
+                    <div class="existing-report">
+                        <div class="existing-left">
+                            <div class="existing-icon"><i class="fa-solid fa-file-pdf"></i></div>
+                            <div>
+                                <span>{{ report.report_name }}</span>
+                                <small style="display:block; color:#7b8794;">Stored Document File</small>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('static', filename='uploads/' ~ report.file_name) }}" target="_blank" class="view-btn">
+                            <i class="fa-solid fa-eye"></i> View File
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="update-btn">
+                <i class="fa-solid fa-floppy-disk"></i> Commit Information Changes
+            </button>
+        </form>
+    </div>
 </div>
 
 <style>
+.edit-page{ max-width:1100px; margin:auto; padding:20px; }
+.page-header{ margin-bottom:25px; }
+.header-left{ display:flex; align-items:center; gap:18px; }
+.header-icon{ width:72px; height:72px; border-radius:22px; display:flex; align-items:center; justify-content:center; font-size:28px; background:linear-gradient(135deg,#1976d2,#42a5f5); color:white; }
+.page-header h1{ margin:0; font-size:34px; color:#163b70; }
+.page-header p{ margin-top:6px; color:#7b8794; }
+.success-alert{ background:#dff6dd; color:#2e7d32; padding:16px 20px; border-radius:16px; margin-bottom:20px; display:flex; align-items:center; gap:10px; font-weight:700; }
+.modern-card{ background:white; border-radius:30px; padding:35px; box-shadow:0 18px 45px rgba(0,0,0,0.08); }
+.form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.input-group{ margin-bottom:22px; }
+.input-group label{ display:block; margin-bottom:10px; font-weight:700; color:#2c3e50; }
+.input-box{ height:58px; border-radius:18px; border:1px solid #dbe5f2; background:#f8fbff; display:flex; align-items:center; padding:0 18px; }
+.input-icon{ color:#1976d2; margin-right:12px; }
+.input-box input{ width:100%; border:none; background:none; outline:none; font-size:15px; }
+.textarea-box{ border-radius:18px; border:1px solid #dbe5f2; background:#f8fbff; padding:15px; }
+.textarea-box textarea{ width:100%; min-height:120px; border:none; background:none; outline:none; resize:vertical; }
+.report-section{ margin-top:20px; padding:25px; border-radius:26px; background:#f8fbff; border:1px solid #e3ebf5; }
+.report-header{ display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+.report-icon{ width:62px; height:62px; border-radius:18px; background:linear-gradient(135deg,#00b894,#00cec9); display:flex; align-items:center; justify-content:center; color:white; font-size:25px; }
+.upload-box{ display:flex; align-items:center; justify-content:space-between; padding:22px; border-radius:20px; border:2px dashed #b7d1ef; background:white; cursor:pointer; }
+.upload-left{ display:flex; align-items:center; gap:16px; }
+.upload-icon{ width:55px; height:55px; border-radius:18px; background:#edf5ff; display:flex; align-items:center; justify-content:center; color:#1976d2; }
+.upload-title{ display:block; font-weight:700; color:#163b70; }
+.upload-btn{ background:#1976d2; color:white; padding:10px 18px; border-radius:12px; }
+.hidden-file{ display:none; }
+.add-more-btn{ margin-top:18px; border:none; background:#163b70; color:white; padding:14px 18px; border-radius:14px; cursor:pointer; font-weight:700; }
+.existing-report{ margin-top:12px; display:flex; justify-content:space-between; align-items:center; gap:15px; background:white; border:1px solid #e3ebf5; border-radius:18px; padding:16px 18px; }
+.existing-left{ display:flex; align-items:center; gap:14px; }
+.existing-icon{ width:52px; height:52px; border-radius:15px; background:#fff1f1; display:flex; align-items:center; justify-content:center; color:#e53935; font-size:22px; }
+.view-btn{ padding:11px 18px; border-radius:12px; text-decoration:none; color:white; background:linear-gradient(135deg,#1976d2,#42a5f5); font-weight:700; display:inline-flex; align-items:center; gap:8px; }
+.update-btn{ width:100%; height:60px; border:none; border-radius:18px; margin-top:25px; background:linear-gradient(135deg,#00b894,#00a383); color:white; font-size:17px; font-weight:700; cursor:pointer; }
 
-/* ===== CARD STYLE ===== */
-.modern-card {
-    max-width: 600px;
-    margin: auto;
-    padding: 25px;
-    border-radius: 20px;
-    background: #ffffff;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-    animation: fadeSlide 0.5s ease;
+/* DROPDOWN STYLING */
+.custom-gender-select{ position:relative; }
+.selected-gender{ height:58px; border-radius:18px; border:1px solid #dbe5f2; background:#f8fbff; display:flex; align-items:center; justify-content:space-between; padding:0 18px; cursor:pointer; font-size:15px; }
+.gender-options{ position:absolute; top:70px; left:0; width:100%; background:white; border-radius:20px; padding:10px; box-shadow:0 20px 40px rgba(0,0,0,0.12); opacity:0; visibility:hidden; transition:0.3s; z-index:50; border:1px solid #dbe5f2; }
+.custom-gender-select.active .gender-options{ opacity:1; visibility:visible; }
+.gender-option{ height:54px; border-radius:14px; display:flex; align-items:center; gap:14px; padding:0 16px; cursor:pointer; }
+.gender-option:hover{ background:#eef6ff; }
+.gender-icon{ width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; }
+.male-icon{ background:#1976d2; }
+.female-icon{ background:#e91e63; }
+.other-icon{ background:#7b8794; }
+.gender-arrow{ transition: 0.3s ease; }
+.custom-gender-select.active .gender-arrow{ transform: rotate(180deg); }
+
+/* ================= COMPREHENSIVE MEDIA QUERIES ================= */
+@media (max-width: 768px) {
+    .modern-card { padding: 20px; }
+    .form-grid { grid-template-columns: 1fr; gap: 0px; }
+    .page-header h1 { font-size: 26px; }
+    .header-icon { width: 58px; height: 58px; font-size: 22px; }
+    .upload-box { flex-direction: column; gap: 15px; text-align: center; }
+    .upload-left { flex-direction: column; gap: 10px; }
+    .existing-report { flex-direction: column; align-items: flex-start; gap: 15px; }
+    .view-btn { width: 100%; justify-content: center; }
 }
-
-/* Animation */
-@keyframes fadeSlide {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Labels */
-label {
-    font-weight: 600;
-    margin-top: 10px;
-    display: block;
-}
-
-/* Inputs */
-input, select, textarea {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    transition: 0.3s;
-}
-
-/* Focus effect */
-input:focus, select:focus, textarea:focus {
-    border-color: #4CAF50;
-    box-shadow: 0 0 10px rgba(76,175,80,0.2);
-    outline: none;
-}
-
-/* File input */
-.file-input {
-    background: #f9f9f9;
-    padding: 8px;
-}
-
-/* Button */
-.btn-edit {
-    width: 100%;
-    padding: 12px;
-    background: linear-gradient(135deg, #4CAF50, #2e7d32);
-    border: none;
-    color: white;
-    font-size: 16px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-/* Button hover */
-.btn-edit:hover {
-    transform: scale(1.05);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
-
-/* Report link */
-.report-link a {
-    color: #2196F3;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.report-link a:hover {
-    text-decoration: underline;
-}
-
-/* ================= CUSTOM GENDER SELECT ================= */
-
-.custom-gender-select{
-position:relative;
-margin-top:6px;
-}
-
-/* MAIN SELECT */
-
-.selected-gender{
-
-height:56px;
-
-padding:0 18px;
-
-border-radius:16px;
-
-background:
-linear-gradient(
-145deg,
-#ffffff,
-#f4f8ff
-);
-
-border:1px solid #dce3ef;
-
-display:flex;
-align-items:center;
-justify-content:space-between;
-
-cursor:pointer;
-
-transition:0.35s ease;
-
-box-shadow:
-0 8px 22px rgba(0,0,0,0.05);
-
-font-size:14px;
-font-weight:500;
-
-color:#7f8c8d;
-}
-
-/* ACTIVE TEXT */
-
-.selected-gender.selected{
-color:#2c3e50;
-}
-
-/* HOVER */
-
-.selected-gender:hover{
-
-transform:translateY(-2px);
-
-border-color:#4CAF50;
-
-box-shadow:
-0 12px 28px rgba(76,175,80,0.12);
-}
-
-/* ACTIVE */
-
-.custom-gender-select.active .selected-gender{
-
-border-color:#4CAF50;
-
-box-shadow:
-0 0 0 4px rgba(76,175,80,0.10),
-0 12px 30px rgba(76,175,80,0.12);
-}
-
-/* ARROW */
-
-.gender-arrow{
-
-font-size:18px;
-
-color:#4CAF50;
-
-transition:0.3s ease;
-}
-
-.custom-gender-select.active .gender-arrow{
-
-transform:rotate(180deg);
-
-}
-
-/* DROPDOWN */
-
-.gender-options{
-
-position:absolute;
-
-top:66px;
-left:0;
-
-width:100%;
-
-background:white;
-
-border-radius:18px;
-
-padding:10px;
-
-opacity:0;
-visibility:hidden;
-
-transform:
-translateY(-10px)
-scale(0.96);
-
-transition:0.35s ease;
-
-box-shadow:
-0 18px 35px rgba(0,0,0,0.12);
-
-z-index:100;
-}
-
-/* SHOW */
-
-.custom-gender-select.active .gender-options{
-
-opacity:1;
-visibility:visible;
-
-transform:
-translateY(0px)
-scale(1);
-
-}
-
-/* OPTION */
-
-.gender-option{
-
-height:52px;
-
-padding:0 16px;
-
-border-radius:14px;
-
-display:flex;
-align-items:center;
-gap:14px;
-
-cursor:pointer;
-
-transition:0.25s ease;
-
-font-size:14px;
-font-weight:500;
-}
-
-.gender-option:hover{
-
-background:#edf8ef;
-
-transform:translateX(4px);
-
-}
-
-/* ICONS */
-
-.gender-icon{
-
-width:34px;
-height:34px;
-
-border-radius:50%;
-
-display:flex;
-align-items:center;
-justify-content:center;
-
-font-size:16px;
-font-weight:700;
-
-color:white;
-}
-
-.male-icon{
-background:#2a7fff;
-}
-
-.female-icon{
-background:#ff5ca8;
-}
-
-.other-icon{
-background:#8e44ad;
-}
-
 </style>
 
 <script>
-
-/* GENDER SELECTOR */
-
-const genderSelect =
-document.getElementById("genderSelect");
-
-const genderInput =
-document.getElementById("genderInput");
-
-const selectedGenderText =
-document.getElementById("selectedGenderText");
-
-/* TOGGLE */
-
-function toggleGenderMenu(){
-
-genderSelect
-.classList
-.toggle("active");
-
+function toggleGenderMenu() {
+    document.getElementById('genderSelect').classList.toggle('active');
 }
 
-/* SELECT */
-
-function selectGender(value,text){
-
-genderInput.value=value;
-
-selectedGenderText.innerHTML=text;
-
-document
-.querySelector(".selected-gender")
-.classList
-.add("selected");
-
-genderSelect
-.classList
-.remove("active");
-
+function selectGender(val) {
+    document.getElementById('selectedGenderText').innerText = val;
+    document.getElementById('genderInput').value = val;
+    document.getElementById('genderSelect').classList.remove('active');
 }
 
-/* CLOSE OUTSIDE */
-
-window.addEventListener("click",(e)=>{
-
-if(!genderSelect.contains(e.target)){
-
-genderSelect
-.classList
-.remove("active");
-
-}
-
+// Close Dropdown if context clicked outside
+window.addEventListener('click', function(e){
+    const select = document.getElementById('genderSelect');
+    if (!select.contains(e.target)){
+        select.classList.remove('active');
+    }
 });
 
+function updateFileNameDisplay(input) {
+    const nameBox = input.closest('.input-group').querySelector('.file-chosen-name');
+    if(input.files.length > 0) {
+        nameBox.innerText = "Selected: " + input.files[0].name;
+    }
+}
+
+function addReportField() {
+    const container = document.getElementById('reportContainer');
+    const newField = document.createElement('div');
+    newField.className = 'report-item';
+    newField.style.marginTop = "20px";
+    newField.style.borderTop = "1px solid #e3ebf5";
+    newField.style.paddingTop = "20px";
+    
+    newField.innerHTML = `
+        <div class="form-grid">
+            <div class="input-group">
+                <label>Report Document Label</label>
+                <div class="input-box">
+                    <i class="fa-solid fa-file-lines input-icon"></i>
+                    <input type="text" name="report_names[]" placeholder="Example: Blood Panel Report">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Upload Document File</label>
+                <label class="upload-box">
+                    <div class="upload-left">
+                        <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                        <div>
+                            <span class="upload-title">Choose File</span>
+                            <small>PDF, JPG, PNG supported</small>
+                        </div>
+                    </div>
+                    <div class="upload-btn">Browse</div>
+                    <input type="file" name="reports[]" class="hidden-file" onchange="updateFileNameDisplay(this)">
+                </label>
+                <div class="file-chosen-name" style="margin-top:5px; color:#1976d2; font-size:13px;"></div>
+            </div>
+        </div>
+    `;
+    container.appendChild(newField);
+}
 </script>
 
 {% endblock %}

@@ -1,36 +1,102 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>DMRM</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>DMRM</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 </head>
+
 <body>
 
-<div class="sidebar">
-    <h2>🏥 DMRM</h2>
-    {% if session.get('role') == 'admin' %}
-        <a href="{{ url_for('dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('add_patient') }}">Add Patient</a>
-        <a href="{{ url_for('view_patients') }}">View Patients</a>
-    {% elif session.get('role') == 'patient' %}
-        <a href="{{ url_for('patient_dashboard') }}">My Dashboard</a>
-    {% endif %}
-    <a href="{{ url_for('logout') }}">Logout</a>
-</div>
+<div class="layout">
 
-<div class="main-content">
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div style="background:#fffae6; padding:10px; border:1px solid #f0e68c; margin-bottom:10px; border-radius:5px;">
-            {% for message in messages %}
-                <p>{{ message }}</p>
-            {% endfor %}
+    <!-- ================================================= -->
+    <!-- ================= SIDEBAR ======================= -->
+    <!-- ================================================= -->
+
+    <div class="sidebar">
+
+        <!-- Logo -->
+
+        <h2 class="logo">
+            🏥 <span>DMRM</span>
+        </h2>
+
+        <!-- Navigation -->
+
+        <div class="sidebar-links">
+
+            {% if session.get('role') == 'admin' %}
+
+            <a href="{{ url_for('dashboard') }}">
+                <i class="fa-solid fa-chart-line"></i>
+                Dashboard
+            </a>
+
+            <a href="{{ url_for('add_patient') }}">
+                <i class="fa-solid fa-user-plus"></i>
+                Add Patient
+            </a>
+
+            <a href="{{ url_for('view_patients') }}">
+                <i class="fa-solid fa-users"></i>
+                View Patients
+            </a>
+
+            {% elif session.get('role') == 'patient' %}
+
+            <a href="{{ url_for('patient_dashboard') }}">
+                <i class="fa-solid fa-user"></i>
+                My Dashboard
+            </a>
+
+            {% endif %}
+
+            <a href="{{ url_for('logout') }}">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Logout
+            </a>
+
         </div>
-      {% endif %}
-    {% endwith %}
 
-    {% block content %}{% endblock %}
+    </div>
+
+    <!-- ================================================= -->
+    <!-- ================= MAIN CONTENT ================== -->
+    <!-- ================================================= -->
+
+    <div class="main-content">
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+
+        <div class="flash-message">
+
+            {% for message in messages %}
+            <p>{{ message }}</p>
+            {% endfor %}
+
+        </div>
+
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+
+    </div>
+
 </div>
 
 </body>
+
 </html>

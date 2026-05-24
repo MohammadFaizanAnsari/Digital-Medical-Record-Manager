@@ -1,56 +1,706 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h2>📅 Appointment Requests</h2>
+<link
+rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+/>
 
-<div class="card">
-    {% if appointments %}
-    <table>
-        <thead>
-            <tr>
-                <th>Patient ID</th>
-                <th>Name</th>
-                <th>Requested Date</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for app in appointments %}
-            <tr>
-                <td>{{ app[1] }}</td>
-                <td>{{ app[2] }}</td>
-                <td>{{ app[3] }}</td>
-                <td>
-                    {% if app[4] == 'pending' %}
-                        ⏳ Pending
-                    {% elif app[4] == 'approved' %}
-                        ✅ Approved
-                    {% elif app[4] == 'rejected' %}
-                        ❌ Rejected
-                    {% else %}
-                        Unknown
-                    {% endif %}
-                </td>
-                <td style="display:flex; gap:5px;">
-                    {% if app[4] == 'pending' %}
-                    <form method="POST" action="/appointments/{{ app[0] }}/approve" style="display:inline;">
-                        <button type="submit" class="btn btn-view">Yes</button>
-                    </form>
-                    <form method="POST" action="/appointments/{{ app[0] }}/reject" style="display:inline;">
-                        <button type="submit" class="btn btn-delete">No</button>
-                    </form>
-                    {% else %}
-                        <em>No actions</em>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-        <p>No appointment requests at the moment.</p>
-    {% endif %}
+<!-- ================================================= -->
+<!-- ================= PAGE HEADER =================== -->
+<!-- ================================================= -->
+
+<div class="appointment-header">
+
+    <div>
+
+        <h1 class="page-title">
+
+            <i class="fa-solid fa-calendar-check"></i>
+
+            Appointment Requests
+
+        </h1>
+
+        <p class="page-subtitle">
+
+            Manage and review patient appointments
+
+        </p>
+
+    </div>
+
 </div>
+
+<!-- ================================================= -->
+<!-- ================= MAIN CARD ===================== -->
+<!-- ================================================= -->
+
+<div class="appointment-card">
+
+{% if appointments %}
+
+<div class="table-wrapper">
+
+<table class="appointment-table">
+
+<thead>
+
+<tr>
+
+<th>Patient</th>
+
+<th>Date</th>
+
+<th>Status</th>
+
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for app in appointments %}
+
+<tr>
+
+<!-- ================================================= -->
+<!-- ================= PATIENT ======================= -->
+<!-- ================================================= -->
+
+<td>
+
+<div class="patient-info">
+
+<div class="avatar">
+
+{{ app[3][0] }}
+
+</div>
+
+<div>
+
+<div class="patient-name">
+
+{{ app[3] }}
+
+</div>
+
+<div class="patient-id">
+
+Patient ID : #{{ app[1] }}
+
+</div>
+
+</div>
+
+</div>
+
+</td>
+
+<!-- ================================================= -->
+<!-- ================= DATE ========================== -->
+<!-- ================================================= -->
+
+<td>
+
+<div class="date-box">
+
+<i class="fa-solid fa-calendar-days"></i>
+
+{{ app[4] }}
+
+</div>
+
+</td>
+
+<!-- ================================================= -->
+<!-- ================= STATUS ======================== -->
+<!-- ================================================= -->
+
+<td>
+
+{% if app[5] == 'pending' %}
+
+<div class="status pending">
+
+<i class="fa-solid fa-clock"></i>
+
+Pending
+
+</div>
+
+{% elif app[5] == 'approved' %}
+
+<div class="status approved">
+
+<i class="fa-solid fa-circle-check"></i>
+
+Approved
+
+</div>
+
+{% elif app[5] == 'rejected' %}
+
+<div class="status rejected">
+
+<i class="fa-solid fa-circle-xmark"></i>
+
+Rejected
+
+</div>
+
+{% endif %}
+
+</td>
+
+<!-- ================================================= -->
+<!-- ================= ACTIONS ======================= -->
+<!-- ================================================= -->
+
+<td>
+
+{% if app[5] == 'pending' %}
+
+<div class="action-group">
+
+<!-- APPROVE -->
+
+<form
+method="POST"
+action="/appointments/{{ app[0] }}/approve"
+>
+
+<button
+type="submit"
+class="action-btn approve-btn"
+>
+
+<i class="fa-solid fa-check"></i>
+
+Accept
+
+</button>
+
+</form>
+
+<!-- REJECT -->
+
+<form
+method="POST"
+action="/appointments/{{ app[0] }}/reject"
+>
+
+<button
+type="submit"
+class="action-btn reject-btn"
+>
+
+<i class="fa-solid fa-xmark"></i>
+
+Reject
+
+</button>
+
+</form>
+
+</div>
+
+{% else %}
+
+<div class="completed-text">
+
+Completed
+
+</div>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% else %}
+
+<!-- ================================================= -->
+<!-- ================= EMPTY STATE =================== -->
+<!-- ================================================= -->
+
+<div class="empty-state">
+
+<div class="empty-icon">
+
+<i class="fa-solid fa-calendar-xmark"></i>
+
+</div>
+
+<h3>
+
+No Appointment Requests
+
+</h3>
+
+<p>
+
+No patient requests available right now.
+
+</p>
+
+</div>
+
+{% endif %}
+
+</div>
+
+<!-- ================================================= -->
+<!-- ================= STYLES ======================== -->
+<!-- ================================================= -->
+
+<style>
+
+/* ================================================= */
+/* ================= PAGE =========================== */
+/* ================================================= */
+
+.appointment-header{
+
+margin-bottom:24px;
+
+}
+
+.page-title{
+
+font-size:34px;
+
+font-weight:700;
+
+color:#163b70;
+
+display:flex;
+
+align-items:center;
+
+gap:14px;
+
+margin-bottom:8px;
+
+}
+
+.page-subtitle{
+
+font-size:16px;
+
+color:#6c757d;
+
+}
+
+/* ================================================= */
+/* ================= CARD =========================== */
+/* ================================================= */
+
+.appointment-card{
+
+background:white;
+
+padding:28px;
+
+border-radius:28px;
+
+box-shadow:
+0 10px 35px rgba(0,0,0,0.08);
+
+animation:fadeUp 0.5s ease;
+
+}
+
+/* ================================================= */
+/* ================= ANIMATION ====================== */
+/* ================================================= */
+
+@keyframes fadeUp{
+
+from{
+
+opacity:0;
+
+transform:translateY(20px);
+
+}
+
+to{
+
+opacity:1;
+
+transform:translateY(0);
+
+}
+
+}
+
+/* ================================================= */
+/* ================= TABLE ========================== */
+/* ================================================= */
+
+.table-wrapper{
+
+overflow-x:auto;
+
+}
+
+.appointment-table{
+
+width:100%;
+
+border-collapse:collapse;
+
+min-width:760px;
+
+}
+
+.appointment-table thead{
+
+background:
+linear-gradient(
+135deg,
+#163b70,
+#2158a8
+);
+
+color:white;
+
+}
+
+.appointment-table th{
+
+padding:18px;
+
+text-align:left;
+
+font-size:15px;
+
+}
+
+.appointment-table td{
+
+padding:18px;
+
+border-bottom:1px solid #edf2f7;
+
+vertical-align:middle;
+
+}
+
+.appointment-table tbody tr:hover{
+
+background:#f8fbff;
+
+}
+
+/* ================================================= */
+/* ================= PATIENT ======================== */
+/* ================================================= */
+
+.patient-info{
+
+display:flex;
+
+align-items:center;
+
+gap:14px;
+
+}
+
+.avatar{
+
+width:46px;
+
+height:46px;
+
+border-radius:50%;
+
+background:
+linear-gradient(
+135deg,
+#163b70,
+#2158a8
+);
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+color:white;
+
+font-weight:700;
+
+font-size:16px;
+
+}
+
+.patient-name{
+
+font-weight:700;
+
+color:#163b70;
+
+margin-bottom:4px;
+
+}
+
+.patient-id{
+
+font-size:13px;
+
+color:#777;
+
+}
+
+/* ================================================= */
+/* ================= DATE =========================== */
+/* ================================================= */
+
+.date-box{
+
+display:inline-flex;
+
+align-items:center;
+
+gap:10px;
+
+padding:10px 14px;
+
+border-radius:14px;
+
+background:#eef4ff;
+
+font-weight:600;
+
+color:#163b70;
+
+}
+
+/* ================================================= */
+/* ================= STATUS ========================= */
+/* ================================================= */
+
+.status{
+
+display:inline-flex;
+
+align-items:center;
+
+gap:8px;
+
+padding:10px 16px;
+
+border-radius:30px;
+
+font-size:13px;
+
+font-weight:600;
+
+}
+
+.pending{
+
+background:#fff5d8;
+
+color:#9a6700;
+
+}
+
+.approved{
+
+background:#dcfce7;
+
+color:#15803d;
+
+}
+
+.rejected{
+
+background:#ffe2e2;
+
+color:#b42318;
+
+}
+
+/* ================================================= */
+/* ================= ACTIONS ======================== */
+/* ================================================= */
+
+.action-group{
+
+display:flex;
+
+gap:10px;
+
+flex-wrap:wrap;
+
+}
+
+.action-btn{
+
+border:none;
+
+padding:12px 16px;
+
+border-radius:14px;
+
+font-size:14px;
+
+font-weight:600;
+
+color:white;
+
+cursor:pointer;
+
+transition:0.3s ease;
+
+display:flex;
+
+align-items:center;
+
+gap:8px;
+
+}
+
+.action-btn:hover{
+
+transform:translateY(-2px);
+
+}
+
+/* APPROVE */
+
+.approve-btn{
+
+background:
+linear-gradient(
+135deg,
+#16a34a,
+#22c55e
+);
+
+}
+
+/* REJECT */
+
+.reject-btn{
+
+background:
+linear-gradient(
+135deg,
+#dc2626,
+#ef4444
+);
+
+}
+
+/* ================================================= */
+/* ================= COMPLETED ====================== */
+/* ================================================= */
+
+.completed-text{
+
+font-weight:600;
+
+color:#777;
+
+}
+
+/* ================================================= */
+/* ================= EMPTY ========================== */
+/* ================================================= */
+
+.empty-state{
+
+padding:60px 20px;
+
+text-align:center;
+
+}
+
+.empty-icon{
+
+width:90px;
+
+height:90px;
+
+border-radius:50%;
+
+background:#eef4ff;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+margin:auto;
+
+margin-bottom:20px;
+
+font-size:38px;
+
+color:#163b70;
+
+}
+
+/* ================================================= */
+/* ================= MOBILE ========================= */
+/* ================================================= */
+
+@media(max-width:768px){
+
+.appointment-card{
+
+padding:18px;
+
+border-radius:22px;
+
+}
+
+.page-title{
+
+font-size:26px;
+
+}
+
+.page-subtitle{
+
+font-size:14px;
+
+}
+
+.appointment-table{
+
+min-width:720px;
+
+}
+
+.action-btn{
+
+width:100%;
+
+justify-content:center;
+
+}
+
+}
+
+</style>
 
 {% endblock %}

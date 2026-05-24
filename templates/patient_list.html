@@ -1,64 +1,448 @@
 {% extends "base.html" %}
+
 {% block content %}
 
-<div class="card">
-    <h2>📋 Patient Records</h2>
+<style>
 
-    <!-- Search -->
-    <form method="GET" action="{{ url_for('view_patients') }}">
-        <input type="text" name="search" placeholder="Search by name or phone"
-               value="{{ request.args.get('search','') }}">
-        <button class="btn btn-view" type="submit">Search</button>
-    </form>
+/* ================================================= */
+/* ================= PAGE HEADER =================== */
+/* ================================================= */
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Gender</th>
-                <th>Disease</th>
-                <th>Phone</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
+.patient-page-header{
+    background:white;
 
-        <tbody>
-            {% for patient in patients %}
-            <tr>
-                <td>{{ patient.id }}</td>
-                <td>{{ patient.name }}</td>
-                <td>{{ patient.gender }}</td>
-                <td>{{ patient.disease }}</td>
-                <td>{{ patient.phone }}</td>
+    padding:28px;
 
-              <td>
-    <a class="btn btn-view"
-       href="{{ url_for('patient_profile', id=patient.id) }}">View</a>
+    border-radius:24px;
 
-    <a class="btn btn-edit"
-       href="{{ url_for('edit_patient', patient_id=patient.id) }}">Edit</a>
+    margin-bottom:24px;
 
-    <form method="POST"
-      action="{{ url_for('delete_patient', patient_id=patient.id) }}"
-      style="display:inline;">
+    box-shadow:0 8px 25px rgba(0,0,0,0.08);
+}
 
-    <button class="btn btn-delete"
-            onclick="return confirm('Delete this patient?')">
-        Delete
-    </button>
+.patient-page-header h2{
+    color:#163b70;
+
+    font-size:34px;
+
+    margin-bottom:20px;
+}
+
+/* ================================================= */
+/* ================= SEARCH BAR ==================== */
+/* ================================================= */
+
+.patient-search-form{
+    display:flex;
+
+    gap:14px;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+}
+
+.patient-search-form input{
+    flex:1;
+
+    min-width:240px;
+
+    padding:16px 18px;
+
+    border-radius:16px;
+
+    border:1px solid #dcdcdc;
+
+    font-size:16px;
+
+    background:#f8fbff;
+}
+
+.patient-search-form button{
+    border:none;
+
+    padding:16px 26px;
+
+    border-radius:16px;
+
+    background:linear-gradient(135deg,#1e3c72,#2a5298);
+
+    color:white;
+
+    font-size:16px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:0.3s;
+}
+
+.patient-search-form button:hover{
+    transform:translateY(-2px);
+}
+
+/* ================================================= */
+/* ================= TABLE CARD ==================== */
+/* ================================================= */
+
+.patient-table-card{
+    background:white;
+
+    padding:28px;
+
+    border-radius:24px;
+
+    box-shadow:0 8px 25px rgba(0,0,0,0.08);
+}
+
+/* ================================================= */
+/* ================= TABLE ========================= */
+/* ================================================= */
+
+.patient-table-wrapper{
+    overflow-x:auto;
+}
+
+.patient-table{
+    width:100%;
+
+    border-collapse:collapse;
+
+    min-width:900px;
+}
+
+.patient-table thead{
+    background:linear-gradient(135deg,#1e3c72,#2a5298);
+
+    color:white;
+}
+
+.patient-table th{
+    padding:18px;
+
+    text-align:left;
+
+    font-size:16px;
+}
+
+.patient-table td{
+    padding:18px 14px;
+
+    border-bottom:1px solid #eee;
+
+    font-size:15px;
+
+    vertical-align:middle;
+}
+
+.patient-table tbody tr:hover{
+    background:#f7fbff;
+}
+
+/* ================================================= */
+/* ================= ACTION BUTTONS ================ */
+/* ================================================= */
+
+.action-buttons{
+    display:flex;
+
+    gap:8px;
+
+    flex-wrap:wrap;
+}
+
+/* Buttons */
+
+.patient-btn{
+    text-decoration:none;
+
+    padding:10px 16px;
+
+    border-radius:12px;
+
+    color:white;
+
+    font-size:14px;
+
+    border:none;
+
+    cursor:pointer;
+
+    transition:0.3s;
+}
+
+.patient-btn:hover{
+    transform:translateY(-2px);
+}
+
+.btn-view{
+    background:#3498db;
+}
+
+.btn-edit{
+    background:#f39c12;
+}
+
+.btn-delete{
+    background:#e74c3c;
+}
+
+/* ================================================= */
+/* ================= EMPTY STATE =================== */
+/* ================================================= */
+
+.no-patient{
+    text-align:center;
+
+    padding:40px;
+
+    font-size:20px;
+
+    color:#666;
+}
+
+/* ================================================= */
+/* ================= MOBILE ======================== */
+/* ================================================= */
+
+@media(max-width:900px){
+
+/* Header */
+
+.patient-page-header{
+    padding:22px;
+}
+
+.patient-page-header h2{
+    font-size:30px;
+
+    text-align:center;
+}
+
+/* Search */
+
+.patient-search-form{
+    flex-direction:column;
+}
+
+.patient-search-form input{
+    width:100%;
+
+    font-size:18px;
+
+    padding:18px;
+}
+
+.patient-search-form button{
+    width:100%;
+
+    font-size:18px;
+
+    padding:18px;
+}
+
+/* Table Card */
+
+.patient-table-card{
+    padding:20px;
+}
+
+/* Table */
+
+.patient-table{
+    min-width:750px;
+}
+
+.patient-table th{
+    font-size:17px;
+}
+
+.patient-table td{
+    font-size:17px;
+}
+
+/* Buttons */
+
+.patient-btn{
+    font-size:16px;
+
+    padding:12px 18px;
+}
+
+}
+
+/* ================================================= */
+/* ================= SMALL DEVICES ================= */
+/* ================================================= */
+
+@media(max-width:480px){
+
+.patient-page-header h2{
+    font-size:26px;
+}
+
+.patient-search-form input{
+    font-size:16px;
+}
+
+.patient-search-form button{
+    font-size:16px;
+}
+
+.patient-table th{
+    font-size:15px;
+}
+
+.patient-table td{
+    font-size:15px;
+}
+
+.patient-btn{
+    width:100%;
+
+    text-align:center;
+}
+
+.action-buttons{
+    flex-direction:column;
+}
+
+}
+
+</style>
+
+<!-- ================================================= -->
+<!-- ================= HEADER ======================= -->
+<!-- ================================================= -->
+
+<div class="patient-page-header">
+
+<h2>
+📋 Patient Records
+</h2>
+
+<!-- Search -->
+
+<form method="GET"
+      action="{{ url_for('view_patients') }}"
+      class="patient-search-form">
+
+<input type="text"
+       name="search"
+       placeholder="Search by name or phone"
+       value="{{ request.args.get('search','') }}">
+
+<button type="submit">
+🔍 Search
+</button>
 
 </form>
-</td>
-            </tr>
 
-            {% else %}
-            <tr>
-                <td colspan="6">No patients found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+</div>
+
+<!-- ================================================= -->
+<!-- ================= TABLE ======================== -->
+<!-- ================================================= -->
+
+<div class="patient-table-card">
+
+<div class="patient-table-wrapper">
+
+<table class="patient-table">
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+
+<th>Name</th>
+
+<th>Gender</th>
+
+<th>Disease</th>
+
+<th>Phone</th>
+
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for patient in patients %}
+
+<tr>
+
+<td>{{ patient.id }}</td>
+
+<td>{{ patient.name }}</td>
+
+<td>{{ patient.gender }}</td>
+
+<td>{{ patient.disease }}</td>
+
+<td>{{ patient.phone }}</td>
+
+<td>
+
+<div class="action-buttons">
+
+<a class="patient-btn btn-view"
+href="{{ url_for('patient_profile', id=patient.id) }}">
+
+👁 View
+
+</a>
+
+<a class="patient-btn btn-edit"
+href="{{ url_for('edit_patient', patient_id=patient.id) }}">
+
+✏ Edit
+
+</a>
+
+<form method="POST"
+action="{{ url_for('delete_patient', patient_id=patient.id) }}">
+
+<button class="patient-btn btn-delete"
+onclick="return confirm('Delete this patient?')">
+
+🗑 Delete
+
+</button>
+
+</form>
+
+</div>
+
+</td>
+
+</tr>
+
+{% else %}
+
+<tr>
+
+<td colspan="6" class="no-patient">
+
+No patients found.
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
 </div>
 
 {% endblock %}

@@ -1,746 +1,1444 @@
 {% extends "base.html" %}
 {% block content %}
 
+<!-- ================================================= -->
+<!-- ================= FONT AWESOME ================== -->
+<!-- ================================================= -->
+
+<link
+rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+/>
+
+<!-- ================================================= -->
+<!-- ================= FLASH MESSAGE ================= -->
+<!-- ================================================= -->
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+
+<div class="flash-wrapper">
+
+    {% for message in messages %}
+
+    <div class="flash-success">
+
+        <i class="fa-solid fa-circle-check"></i>
+
+        {{ message }}
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+{% endif %}
+{% endwith %}
+
+<!-- ================================================= -->
+<!-- ================= PAGE ========================== -->
+<!-- ================================================= -->
+
+<div class="add-patient-page">
+
+    <!-- ============================================= -->
+    <!-- HEADER -->
+    <!-- ============================================= -->
+
+    <div class="page-header">
+
+        <div class="header-left">
+
+            <div class="header-icon">
+
+                <i class="fa-solid fa-user-plus"></i>
+
+            </div>
+
+            <div>
+
+                <h1>
+                    Add New Patient
+                </h1>
+
+                <p>
+                    Create patient profile and upload multiple medical reports
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ============================================= -->
+    <!-- CARD -->
+    <!-- ============================================= -->
+
+    <div class="patient-card">
+
+        <form
+        method="POST"
+        enctype="multipart/form-data"
+        class="patient-form"
+        >
+
+            <!-- ===================================== -->
+            <!-- GRID -->
+            <!-- ===================================== -->
+
+            <div class="form-grid">
+
+                <!-- FULL NAME -->
+
+                <div class="form-group">
+
+                    <label>
+                        Full Name
+                    </label>
+
+                    <div class="input-box">
+
+                        <i class="fa-solid fa-user input-icon"></i>
+
+                        <input
+                        type="text"
+                        name="name"
+                        placeholder="Enter patient full name"
+                        required
+                        >
+
+                    </div>
+
+                </div>
+
+                <!-- AGE -->
+
+                <div class="form-group">
+
+                    <label>
+                        Age
+                    </label>
+
+                    <div class="input-box">
+
+                        <i class="fa-solid fa-cake-candles input-icon"></i>
+
+                        <input
+                        type="number"
+                        name="age"
+                        placeholder="Enter age"
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ===================================== -->
+            <!-- GENDER -->
+            <!-- ===================================== -->
+
+            <div class="form-group">
+
+                <label>
+                    Gender
+                </label>
+
+                <div
+                class="custom-gender-select"
+                id="genderSelect"
+                >
+
+                    <div
+                    class="selected-gender"
+                    onclick="toggleGenderMenu()"
+                    >
+
+                        <span id="selectedGenderText">
+
+                            Select Gender
+
+                        </span>
+
+                        <i class="fa-solid fa-chevron-down gender-arrow"></i>
+
+                    </div>
+
+                    <!-- OPTIONS -->
+
+                    <div class="gender-options">
+
+                        <div
+                        class="gender-option"
+                        onclick="selectGender('Male','Male')"
+                        >
+
+                            <div class="gender-icon male-icon">
+
+                                <i class="fa-solid fa-mars"></i>
+
+                            </div>
+
+                            <span>
+                                Male
+                            </span>
+
+                        </div>
+
+                        <div
+                        class="gender-option"
+                        onclick="selectGender('Female','Female')"
+                        >
+
+                            <div class="gender-icon female-icon">
+
+                                <i class="fa-solid fa-venus"></i>
+
+                            </div>
+
+                            <span>
+                                Female
+                            </span>
+
+                        </div>
+
+                        <div
+                        class="gender-option"
+                        onclick="selectGender('Other','Other')"
+                        >
+
+                            <div class="gender-icon other-icon">
+
+                                <i class="fa-solid fa-user"></i>
+
+                            </div>
+
+                            <span>
+                                Other
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <input
+                    type="hidden"
+                    name="gender"
+                    id="genderInput"
+                    >
+
+                </div>
+
+            </div>
+
+            <!-- ===================================== -->
+            <!-- PHONE + EMAIL -->
+            <!-- ===================================== -->
+
+            <div class="form-grid">
+
+                <!-- PHONE -->
+
+                <div class="form-group">
+
+                    <label>
+                        Phone Number
+                    </label>
+
+                    <div class="input-box">
+
+                        <i class="fa-solid fa-phone input-icon"></i>
+
+                        <input
+                        type="text"
+                        name="phone"
+                        placeholder="Enter contact number"
+                        >
+
+                    </div>
+
+                </div>
+
+                <!-- EMAIL -->
+
+                <div class="form-group">
+
+                    <label>
+                        Email
+                    </label>
+
+                    <div class="input-box">
+
+                        <i class="fa-solid fa-envelope input-icon"></i>
+
+                        <input
+                        type="email"
+                        name="email"
+                        placeholder="Enter patient email"
+                        required
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ===================================== -->
+            <!-- DISEASE + BLOOD -->
+            <!-- ===================================== -->
+
+            <div class="form-grid">
+
+                <!-- DISEASE -->
+
+                <div class="form-group">
+
+                    <label>
+                        Disease / Diagnosis
+                    </label>
+
+                    <div class="input-box">
+
+                        <i class="fa-solid fa-stethoscope input-icon"></i>
+
+                        <input
+                        type="text"
+                        name="disease"
+                        placeholder="Enter disease or condition"
+                        >
+
+                    </div>
+
+                </div>
+
+                <!-- BLOOD GROUP -->
+
+                <div class="form-group">
+
+                    <label>
+                        Blood Group
+                    </label>
+
+                    <div class="input-box">
+
+                        <i class="fa-solid fa-droplet input-icon"></i>
+
+                        <input
+                        type="text"
+                        name="blood_group"
+                        placeholder="e.g. O+, A-, B+"
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ===================================== -->
+            <!-- ADDRESS -->
+            <!-- ===================================== -->
+
+            <div class="form-group">
+
+                <label>
+                    Address
+                </label>
+
+                <div class="textarea-box">
+
+                    <textarea
+                    name="address"
+                    rows="4"
+                    placeholder="Enter full address"
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+            <!-- ===================================== -->
+            <!-- MULTIPLE REPORTS -->
+            <!-- ===================================== -->
+
+            <div class="report-section">
+
+                <!-- TOP -->
+
+                <div class="report-header">
+
+                    <div class="report-icon">
+
+                        <i class="fa-solid fa-file-medical"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            Medical Reports
+                        </h3>
+
+                        <p>
+                            Upload multiple reports with custom names
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- REPORT CONTAINER -->
+
+                <div id="reportContainer">
+
+                    <!-- REPORT ITEM -->
+
+                    <div class="report-item">
+
+                        <div class="report-top">
+
+                            <div class="report-number">
+
+                                <i class="fa-solid fa-file-waveform"></i>
+
+                                Report 1
+
+                            </div>
+
+                            <button
+                            type="button"
+                            class="remove-report-btn"
+                            onclick="removeReport(this)"
+                            >
+
+                                <i class="fa-solid fa-trash"></i>
+
+                            </button>
+
+                        </div>
+
+                        <!-- REPORT NAME -->
+
+                        <div class="form-group">
+
+                            <label>
+                                Report Name
+                            </label>
+
+                            <div class="input-box">
+
+                                <i class="fa-solid fa-pen-to-square input-icon"></i>
+
+                                <input
+                                type="text"
+                                name="report_names[]"
+                                placeholder="e.g. Blood Test, MRI Scan"
+                                >
+
+                            </div>
+
+                        </div>
+
+                        <!-- FILE -->
+
+                        <div class="form-group">
+
+                            <label>
+                                Upload File
+                            </label>
+
+                            <label class="upload-box">
+
+                                <div class="upload-left">
+
+                                    <div class="upload-icon">
+
+                                        <i class="fa-solid fa-cloud-arrow-up"></i>
+
+                                    </div>
+
+                                    <div>
+
+                                        <span class="upload-title">
+
+                                            Select Medical File
+
+                                        </span>
+
+                                        <small>
+
+                                            PDF, JPG, PNG supported
+
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="browse-btn">
+
+                                    Browse
+
+                                </div>
+
+                                <input
+                                type="file"
+                                name="reports[]"
+                                class="hidden-file"
+                                onchange="showFileName(this)"
+                                >
+
+                            </label>
+
+                            <div class="selected-file-name">
+
+                                No file selected
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ADD REPORT -->
+
+                <button
+                type="button"
+                class="add-report-btn"
+                onclick="addMoreReport()"
+                >
+
+                    <i class="fa-solid fa-plus"></i>
+
+                    Add Another Report
+
+                </button>
+
+            </div>
+
+            <!-- ===================================== -->
+            <!-- BUTTON -->
+            <!-- ===================================== -->
+
+            <button
+            class="save-btn"
+            type="submit"
+            >
+
+                <i class="fa-solid fa-floppy-disk"></i>
+
+                Save Patient
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<!-- ================================================= -->
+<!-- ================= STYLES ======================= -->
+<!-- ================================================= -->
+
 <style>
 
-/* ================= MAIN CARD ================= */
+/* ================================================ */
+/* PAGE */
+/* ================================================ */
+
+.add-patient-page{
+
+    max-width:1100px;
+
+    margin:auto;
+
+    padding:20px;
+}
+
+/* ================================================ */
+/* FLASH */
+/* ================================================ */
+
+.flash-wrapper{
+
+    max-width:1100px;
+
+    margin:20px auto;
+}
+
+.flash-success{
+
+    background:linear-gradient(135deg,#00b894,#00a383);
+
+    color:white;
+
+    padding:16px 22px;
+
+    border-radius:18px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    font-weight:600;
+
+    box-shadow:0 12px 25px rgba(0,184,148,0.20);
+
+    animation:fadeDown .4s ease;
+}
+
+@keyframes fadeDown{
+
+    from{
+        opacity:0;
+        transform:translateY(-20px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+
+}
+
+/* ================================================ */
+/* HEADER */
+/* ================================================ */
+
+.page-header{
+
+    margin-bottom:25px;
+}
+
+.header-left{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+}
+
+.header-icon{
+
+    width:72px;
+
+    height:72px;
+
+    border-radius:22px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:28px;
+
+    background:
+    linear-gradient(
+    135deg,
+    #1976d2,
+    #42a5f5
+    );
+
+    color:white;
+
+    box-shadow:
+    0 10px 30px rgba(25,118,210,0.25);
+}
+
+.page-header h1{
+
+    margin:0;
+
+    font-size:34px;
+
+    color:#163b70;
+}
+
+.page-header p{
+
+    margin-top:6px;
+
+    color:#7b8794;
+
+    font-size:15px;
+}
+
+/* ================================================ */
+/* CARD */
+/* ================================================ */
 
 .patient-card{
 
-max-width:720px;
+    background:white;
 
-margin:auto;
+    border-radius:30px;
 
-padding:38px;
+    padding:35px;
 
-border-radius:30px;
+    box-shadow:
+    0 18px 45px rgba(0,0,0,0.08);
 
-background:
-linear-gradient(
-145deg,
-#ffffff,
-#f7faff
-);
-
-box-shadow:
-0 18px 40px rgba(0,0,0,0.07);
-
-animation:fadeUp 0.8s ease;
+    animation:fadeUp 0.5s ease;
 }
-
-/* ================= ANIMATION ================= */
 
 @keyframes fadeUp{
 
-from{
-opacity:0;
-transform:translateY(30px);
+    from{
+
+        opacity:0;
+        transform:translateY(25px);
+
+    }
+
+    to{
+
+        opacity:1;
+        transform:translateY(0);
+
+    }
+
 }
 
-to{
-opacity:1;
-transform:translateY(0px);
-}
-
-}
-
-.patient-card h2{
-
-font-size:32px;
-
-font-weight:700;
-
-color:#1e3c72;
-
-margin-bottom:35px;
-
-display:flex;
-align-items:center;
-gap:12px;
-}
-
-/* ================= FORM ================= */
+/* ================================================ */
+/* FORM */
+/* ================================================ */
 
 .patient-form{
 
-display:flex;
-flex-direction:column;
+    display:flex;
 
-gap:22px;
+    flex-direction:column;
 }
 
-/* ================= FORM GROUP ================= */
+/* ================================================ */
+/* GRID */
+/* ================================================ */
+
+.form-grid{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:20px;
+}
+
+/* ================================================ */
+/* FORM GROUP */
+/* ================================================ */
 
 .form-group{
-display:flex;
-flex-direction:column;
+
+    margin-bottom:22px;
 }
 
-/* ================= LABEL ================= */
+.form-group label{
 
-label{
+    display:block;
 
-font-size:14px;
-font-weight:600;
+    margin-bottom:10px;
 
-margin-bottom:10px;
+    font-size:14px;
 
-color:#2c3e50;
+    font-weight:700;
+
+    color:#2c3e50;
 }
 
-/* ================= INPUTS ================= */
+/* ================================================ */
+/* INPUT */
+/* ================================================ */
 
-input,
-textarea{
+.input-box{
 
-width:100%;
+    height:58px;
 
-padding:16px 18px;
+    border-radius:18px;
 
-border-radius:18px;
+    border:1px solid #dbe5f2;
 
-border:1px solid #d9e1ec;
+    background:#f8fbff;
 
-background:
-linear-gradient(
-145deg,
-#ffffff,
-#f8fbff
-);
+    display:flex;
 
-font-size:14px;
+    align-items:center;
 
-transition:0.3s ease;
+    padding:0 18px;
 
-box-shadow:
-0 6px 18px rgba(0,0,0,0.04);
+    transition:0.3s;
 }
 
-/* FOCUS */
+.input-box:focus-within{
 
-input:focus,
-textarea:focus{
+    border-color:#1976d2;
 
-outline:none;
+    background:white;
 
-border-color:#2a5298;
-
-transform:translateY(-2px);
-
-box-shadow:
-0 0 0 4px rgba(42,82,152,0.10),
-0 12px 28px rgba(42,82,152,0.10);
+    box-shadow:
+    0 0 0 4px rgba(25,118,210,0.10);
 }
 
-/* ================= CUSTOM GENDER SELECT ================= */
+.input-icon{
+
+    color:#1976d2;
+
+    margin-right:12px;
+
+    font-size:16px;
+}
+
+.input-box input{
+
+    width:100%;
+
+    border:none;
+
+    background:none;
+
+    outline:none;
+
+    font-size:15px;
+}
+
+/* ================================================ */
+/* TEXTAREA */
+/* ================================================ */
+
+.textarea-box{
+
+    border-radius:18px;
+
+    border:1px solid #dbe5f2;
+
+    background:#f8fbff;
+
+    padding:15px;
+
+    transition:0.3s;
+}
+
+.textarea-box:focus-within{
+
+    border-color:#1976d2;
+
+    background:white;
+
+    box-shadow:
+    0 0 0 4px rgba(25,118,210,0.10);
+}
+
+.textarea-box textarea{
+
+    width:100%;
+
+    min-height:120px;
+
+    border:none;
+
+    resize:vertical;
+
+    background:none;
+
+    outline:none;
+
+    font-size:15px;
+}
+
+/* ================================================ */
+/* GENDER */
+/* ================================================ */
 
 .custom-gender-select{
-position:relative;
-}
 
-/* MAIN SELECT */
+    position:relative;
+}
 
 .selected-gender{
 
-height:58px;
+    height:58px;
 
-padding:0 18px;
+    border-radius:18px;
 
-border-radius:18px;
+    border:1px solid #dbe5f2;
 
-background:
-linear-gradient(
-145deg,
-#ffffff,
-#f4f8ff
-);
+    background:#f8fbff;
 
-border:1px solid #dce3ef;
+    display:flex;
 
-display:flex;
-align-items:center;
-justify-content:space-between;
+    align-items:center;
 
-cursor:pointer;
+    justify-content:space-between;
 
-transition:0.35s ease;
+    padding:0 18px;
 
-box-shadow:
-0 8px 22px rgba(0,0,0,0.05);
+    cursor:pointer;
 
-font-size:14px;
-font-weight:500;
-
-color:#7f8c8d;
+    transition:0.3s;
 }
-
-/* WHEN SELECTED */
-
-.selected-gender.selected{
-
-color:#2c3e50;
-
-font-weight:500;
-}
-
-/* HOVER */
 
 .selected-gender:hover{
 
-transform:translateY(-2px);
-
-border-color:#2a5298;
-
-box-shadow:
-0 12px 28px rgba(42,82,152,0.12);
+    border-color:#1976d2;
 }
-
-/* ACTIVE */
 
 .custom-gender-select.active .selected-gender{
 
-border-color:#2a5298;
+    border-color:#1976d2;
 
-box-shadow:
-0 0 0 4px rgba(42,82,152,0.10),
-0 12px 30px rgba(42,82,152,0.12);
+    background:white;
+
+    box-shadow:
+    0 0 0 4px rgba(25,118,210,0.10);
 }
-
-/* ARROW */
 
 .gender-arrow{
 
-font-size:18px;
+    color:#1976d2;
 
-color:#2a5298;
-
-transition:0.3s ease;
+    transition:0.3s;
 }
 
 .custom-gender-select.active .gender-arrow{
 
-transform:rotate(180deg);
-
+    transform:rotate(180deg);
 }
-
-/* DROPDOWN */
 
 .gender-options{
 
-position:absolute;
+    position:absolute;
 
-top:68px;
-left:0;
+    top:70px;
 
-width:100%;
+    left:0;
 
-background:white;
+    width:100%;
 
-border-radius:18px;
+    background:white;
 
-padding:10px;
+    border-radius:20px;
 
-opacity:0;
-visibility:hidden;
+    padding:10px;
 
-transform:
-translateY(-10px)
-scale(0.96);
+    box-shadow:
+    0 20px 40px rgba(0,0,0,0.12);
 
-transition:0.35s ease;
+    opacity:0;
 
-box-shadow:
-0 18px 35px rgba(0,0,0,0.12);
+    visibility:hidden;
 
-z-index:100;
+    transform:translateY(-10px);
+
+    transition:0.3s;
+
+    z-index:50;
 }
-
-/* SHOW */
 
 .custom-gender-select.active .gender-options{
 
-opacity:1;
-visibility:visible;
+    opacity:1;
 
-transform:
-translateY(0px)
-scale(1);
+    visibility:visible;
 
+    transform:translateY(0);
 }
-
-/* OPTION */
 
 .gender-option{
 
-height:54px;
+    height:54px;
 
-padding:0 16px;
+    border-radius:14px;
 
-border-radius:14px;
+    display:flex;
 
-display:flex;
-align-items:center;
-gap:14px;
+    align-items:center;
 
-cursor:pointer;
+    gap:14px;
 
-transition:0.25s ease;
+    padding:0 16px;
 
-font-size:14px;
-font-weight:500;
+    cursor:pointer;
 
-color:#2c3e50;
+    transition:0.25s;
 }
 
 .gender-option:hover{
 
-background:#edf3ff;
+    background:#eef6ff;
 
-transform:translateX(4px);
+    transform:translateX(4px);
 }
-
-/* ICONS */
 
 .gender-icon{
 
-width:34px;
-height:34px;
+    width:36px;
 
-border-radius:50%;
+    height:36px;
 
-display:flex;
-align-items:center;
-justify-content:center;
+    border-radius:50%;
 
-font-size:16px;
-font-weight:700;
+    display:flex;
 
-color:white;
+    align-items:center;
+
+    justify-content:center;
+
+    color:white;
 }
 
 .male-icon{
-background:#2a7fff;
+background:#1976d2;
 }
 
 .female-icon{
-background:#ff5ca8;
+background:#e91e63;
 }
 
 .other-icon{
 background:#8e44ad;
 }
 
-/* ================= FILE UPLOAD ================= */
+/* ================================================ */
+/* REPORT SECTION */
+/* ================================================ */
+
+.report-section{
+
+    margin-top:12px;
+
+    margin-bottom:28px;
+
+    padding:25px;
+
+    border-radius:26px;
+
+    background:
+    linear-gradient(
+    145deg,
+    #f8fbff,
+    #ffffff
+    );
+
+    border:1px solid #e3ebf5;
+}
+
+.report-header{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:16px;
+
+    margin-bottom:24px;
+}
+
+.report-icon{
+
+    width:62px;
+
+    height:62px;
+
+    border-radius:18px;
+
+    background:
+    linear-gradient(
+    135deg,
+    #00b894,
+    #00cec9
+    );
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    color:white;
+
+    font-size:25px;
+}
+
+.report-header h3{
+
+    margin:0;
+
+    color:#163b70;
+}
+
+.report-header p{
+
+    margin-top:5px;
+
+    color:#7b8794;
+
+    font-size:14px;
+}
+
+/* ================================================ */
+/* REPORT ITEM */
+/* ================================================ */
+
+.report-item{
+
+    background:white;
+
+    border-radius:24px;
+
+    border:1px solid #e4edf8;
+
+    padding:22px;
+
+    margin-bottom:22px;
+}
+
+.report-top{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    margin-bottom:20px;
+}
+
+.report-number{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    font-size:17px;
+
+    font-weight:700;
+
+    color:#163b70;
+}
+
+.remove-report-btn{
+
+    width:42px;
+
+    height:42px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#ffeaea;
+
+    color:#e53935;
+
+    cursor:pointer;
+
+    transition:0.3s;
+}
+
+.remove-report-btn:hover{
+
+    transform:scale(1.05);
+}
+
+/* ================================================ */
+/* UPLOAD */
+/* ================================================ */
 
 .upload-box{
 
-position:relative;
+    display:flex;
 
-border:2px dashed #b8c7e3;
+    align-items:center;
 
-border-radius:24px;
+    justify-content:space-between;
 
-padding:34px;
+    gap:15px;
 
-text-align:center;
+    padding:22px;
 
-background:
-linear-gradient(
-145deg,
-#f8fbff,
-#eef5ff
-);
+    border-radius:20px;
 
-transition:0.3s ease;
+    border:2px dashed #b7d1ef;
 
-cursor:pointer;
+    background:white;
 
-overflow:hidden;
+    cursor:pointer;
+
+    transition:0.3s;
+
+    position:relative;
 }
 
 .upload-box:hover{
 
-border-color:#2a5298;
+    border-color:#1976d2;
 
-transform:translateY(-3px);
+    transform:translateY(-2px);
 
-box-shadow:
-0 12px 28px rgba(42,82,152,0.12);
+    box-shadow:
+    0 12px 30px rgba(25,118,210,0.10);
 }
 
-.upload-box input{
+.upload-left{
 
-position:absolute;
+    display:flex;
 
-width:100%;
-height:100%;
+    align-items:center;
 
-left:0;
-top:0;
-
-opacity:0;
-
-cursor:pointer;
+    gap:16px;
 }
-
-/* ICON */
 
 .upload-icon{
 
-font-size:46px;
+    width:55px;
 
-margin-bottom:12px;
+    height:55px;
+
+    border-radius:18px;
+
+    background:#edf5ff;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    color:#1976d2;
+
+    font-size:24px;
 }
-
-/* TITLE */
 
 .upload-title{
 
-font-size:16px;
-font-weight:600;
+    display:block;
 
-color:#1e3c72;
+    font-size:16px;
 
-margin-bottom:6px;
+    font-weight:700;
+
+    color:#163b70;
+
+    margin-bottom:4px;
 }
 
-/* SUBTEXT */
+.upload-left small{
 
-.upload-sub{
-
-font-size:13px;
-
-color:#7f8c8d;
+    color:#7b8794;
 }
 
-/* ================= BUTTON ================= */
+.browse-btn{
+
+    background:#1976d2;
+
+    color:white;
+
+    padding:10px 18px;
+
+    border-radius:12px;
+
+    font-size:14px;
+
+    font-weight:600;
+}
+
+.hidden-file{
+
+    display:none;
+}
+
+.selected-file-name{
+
+    margin-top:10px;
+
+    font-size:14px;
+
+    color:#1976d2;
+
+    font-weight:600;
+}
+
+/* ================================================ */
+/* ADD REPORT */
+/* ================================================ */
+
+.add-report-btn{
+
+    width:100%;
+
+    height:58px;
+
+    border:none;
+
+    border-radius:18px;
+
+    background:#eef6ff;
+
+    color:#1976d2;
+
+    font-size:15px;
+
+    font-weight:700;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:10px;
+
+    cursor:pointer;
+
+    transition:0.3s;
+}
+
+.add-report-btn:hover{
+
+    background:#dcecff;
+}
+
+/* ================================================ */
+/* SAVE BUTTON */
+/* ================================================ */
 
 .save-btn{
 
-width:100%;
+    width:100%;
 
-height:60px;
+    height:60px;
 
-border:none;
+    border:none;
 
-border-radius:20px;
+    border-radius:18px;
 
-background:
-linear-gradient(
-to right,
-#2a5298,
-#1e3c72
-);
+    background:
+    linear-gradient(
+    135deg,
+    #00b894,
+    #00a383
+    );
 
-color:white;
+    color:white;
 
-font-size:15px;
-font-weight:600;
+    font-size:17px;
 
-cursor:pointer;
+    font-weight:700;
 
-transition:0.3s ease;
+    display:flex;
 
-margin-top:8px;
+    align-items:center;
 
-box-shadow:
-0 10px 24px rgba(42,82,152,0.20);
+    justify-content:center;
+
+    gap:10px;
+
+    cursor:pointer;
+
+    transition:0.3s;
 }
 
 .save-btn:hover{
 
-transform:translateY(-3px);
+    transform:translateY(-3px);
 
-box-shadow:
-0 14px 30px rgba(42,82,152,0.28);
+    box-shadow:
+    0 18px 35px rgba(0,184,148,0.25);
 }
 
-/* ================= MOBILE ================= */
+/* ================================================ */
+/* MOBILE */
+/* ================================================ */
 
 @media(max-width:768px){
 
-.patient-card{
+.add-patient-page{
 
-padding:24px;
-
-border-radius:24px;
+    padding:10px;
 }
 
-.patient-card h2{
-font-size:26px;
+.patient-card{
+
+    padding:20px;
+}
+
+.form-grid{
+
+    grid-template-columns:1fr;
+}
+
+.page-header h1{
+
+    font-size:28px;
+}
+
+.header-icon{
+
+    width:60px;
+    height:60px;
+
+    font-size:24px;
+}
+
+.report-header{
+
+    flex-direction:column;
+
+    align-items:flex-start;
+}
+
+.upload-box{
+
+    flex-direction:column;
+
+    align-items:flex-start;
+}
+
+.browse-btn{
+
+    width:100%;
+
+    text-align:center;
+}
+
+.save-btn{
+
+    height:56px;
+
+    font-size:15px;
+}
+
+.report-top{
+
+    flex-direction:row;
 }
 
 }
 
 </style>
 
-<div class="patient-card">
-
-<h2>
-➕ Add New Patient
-</h2>
-
-<form
-method="POST"
-enctype="multipart/form-data"
-class="patient-form"
->
-
-<!-- FULL NAME -->
-
-<div class="form-group">
-
-<label>
-Full Name
-</label>
-
-<input
-type="text"
-name="name"
-placeholder="Enter patient full name"
-required
->
-
-</div>
-
-<!-- AGE -->
-
-<div class="form-group">
-
-<label>
-Age
-</label>
-
-<input
-type="number"
-name="age"
-placeholder="Enter age"
->
-
-</div>
-
-<!-- GENDER -->
-
-<div class="form-group">
-
-<label>
-Gender
-</label>
-
-<div class="custom-gender-select" id="genderSelect">
-
-<div
-class="selected-gender"
-onclick="toggleGenderMenu()"
->
-
-<span id="selectedGenderText">
-Select Gender
-</span>
-
-<span class="gender-arrow">
-⌄
-</span>
-
-</div>
-
-<!-- OPTIONS -->
-
-<div class="gender-options">
-
-<!-- MALE -->
-
-<div
-class="gender-option"
-onclick="selectGender('Male','Male')"
->
-
-<div class="gender-icon male-icon">
-♂
-</div>
-
-<span>
-Male
-</span>
-
-</div>
-
-<!-- FEMALE -->
-
-<div
-class="gender-option"
-onclick="selectGender('Female','Female')"
->
-
-<div class="gender-icon female-icon">
-♀
-</div>
-
-<span>
-Female
-</span>
-
-</div>
-
-<!-- OTHER -->
-
-<div
-class="gender-option"
-onclick="selectGender('Other','Other')"
->
-
-<div class="gender-icon other-icon">
-•
-</div>
-
-<span>
-Other
-</span>
-
-</div>
-
-</div>
-
-<input
-type="hidden"
-name="gender"
-id="genderInput"
->
-
-</div>
-
-</div>
-
-<!-- PHONE -->
-
-<div class="form-group">
-
-<label>
-Phone Number
-</label>
-
-<input
-type="text"
-name="phone"
-placeholder="Enter contact number"
->
-
-</div>
-
-<!-- EMAIL -->
-
-<div class="form-group">
-
-<label>
-Email
-</label>
-
-<input
-type="email"
-name="email"
-placeholder="Enter patient email"
-required
->
-
-</div>
-
-<!-- DISEASE -->
-
-<div class="form-group">
-
-<label>
-Disease / Diagnosis
-</label>
-
-<input
-type="text"
-name="disease"
-placeholder="Enter disease or condition"
->
-
-</div>
-
-<!-- BLOOD GROUP -->
-
-<div class="form-group">
-
-<label>
-Blood Group
-</label>
-
-<input
-type="text"
-name="blood_group"
-placeholder="e.g. O+, A-, B+"
->
-
-</div>
-
-<!-- ADDRESS -->
-
-<div class="form-group">
-
-<label>
-Address
-</label>
-
-<textarea
-name="address"
-rows="4"
-placeholder="Enter full address"
-></textarea>
-
-</div>
-
-<!-- FILE UPLOAD -->
-
-<div class="form-group">
-
-<label>
-Upload Medical Report
-</label>
-
-<label class="upload-box">
-
-<input
-type="file"
-name="report"
->
-
-<div class="upload-icon">
-📄
-</div>
-
-<div class="upload-title">
-Upload PDF or Image Report
-</div>
-
-<div class="upload-sub">
-Drag & drop or click to browse
-</div>
-
-</label>
-
-</div>
-
-<!-- BUTTON -->
-
-<button
-class="save-btn"
-type="submit"
->
-
-💾 Save Patient
-
-</button>
-
-</form>
-
-</div>
+<!-- ================================================= -->
+<!-- ================= SCRIPT ======================== -->
+<!-- ================================================= -->
 
 <script>
 
-/* ================= GENDER SELECTOR ================= */
+/* ================================================ */
+/* GENDER DROPDOWN */
+/* ================================================ */
 
 const genderSelect =
 document.getElementById("genderSelect");
@@ -751,8 +1449,6 @@ document.getElementById("genderInput");
 const selectedGenderText =
 document.getElementById("selectedGenderText");
 
-/* TOGGLE */
-
 function toggleGenderMenu(){
 
 genderSelect
@@ -761,26 +1457,17 @@ genderSelect
 
 }
 
-/* SELECT */
-
 function selectGender(value,text){
 
 genderInput.value=value;
 
 selectedGenderText.innerHTML=text;
 
-document
-.querySelector(".selected-gender")
-.classList
-.add("selected");
-
 genderSelect
 .classList
 .remove("active");
 
 }
-
-/* CLOSE OUTSIDE */
 
 window.addEventListener("click",(e)=>{
 
@@ -793,6 +1480,168 @@ genderSelect
 }
 
 });
+
+/* ================================================ */
+/* ADD MORE REPORT */
+/* ================================================ */
+
+let reportCount = 1;
+
+function addMoreReport(){
+
+reportCount++;
+
+const container =
+document.getElementById("reportContainer");
+
+const div =
+document.createElement("div");
+
+div.className = "report-item";
+
+div.innerHTML = `
+
+<div class="report-top">
+
+    <div class="report-number">
+
+        <i class="fa-solid fa-file-waveform"></i>
+
+        Report ${reportCount}
+
+    </div>
+
+    <button
+    type="button"
+    class="remove-report-btn"
+    onclick="removeReport(this)"
+    >
+
+        <i class="fa-solid fa-trash"></i>
+
+    </button>
+
+</div>
+
+<div class="form-group">
+
+    <label>
+        Report Name
+    </label>
+
+    <div class="input-box">
+
+        <i class="fa-solid fa-pen-to-square input-icon"></i>
+
+        <input
+        type="text"
+        name="report_names[]"
+        placeholder="e.g. X-Ray, CT Scan"
+        >
+
+    </div>
+
+</div>
+
+<div class="form-group">
+
+    <label>
+        Upload File
+    </label>
+
+    <label class="upload-box">
+
+        <div class="upload-left">
+
+            <div class="upload-icon">
+
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+
+            </div>
+
+            <div>
+
+                <span class="upload-title">
+
+                    Select Medical File
+
+                </span>
+
+                <small>
+
+                    PDF, JPG, PNG supported
+
+                </small>
+
+            </div>
+
+        </div>
+
+        <div class="browse-btn">
+
+            Browse
+
+        </div>
+
+        <input
+        type="file"
+        name="reports[]"
+        class="hidden-file"
+        onchange="showFileName(this)"
+        >
+
+    </label>
+
+    <div class="selected-file-name">
+
+        No file selected
+
+    </div>
+
+</div>
+
+`;
+
+container.appendChild(div);
+
+}
+
+/* ================================================ */
+/* REMOVE REPORT */
+/* ================================================ */
+
+function removeReport(button){
+
+const items =
+document.querySelectorAll(".report-item");
+
+if(items.length > 1){
+
+button
+.parentElement
+.parentElement
+.remove();
+
+}
+
+}
+
+/* ================================================ */
+/* SHOW FILE NAME */
+/* ================================================ */
+
+function showFileName(input){
+
+const fileName =
+input.files[0]?.name || "No file selected";
+
+input
+.parentElement
+.parentElement
+.querySelector(".selected-file-name")
+.innerHTML = fileName;
+
+}
 
 </script>
 

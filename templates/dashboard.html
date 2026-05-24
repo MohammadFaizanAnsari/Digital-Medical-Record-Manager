@@ -1,149 +1,487 @@
 {% extends "base.html" %}
+
 {% block content %}
-
-<h2>📊 Dashboard Overview</h2>
-
-<!-- ================= DOCTOR INFO ================= -->
-
-<div class="card clinic-info">
-
-<h2>Welcome Dr. {{ doctor.name }}</h2>
-
-<p><b>Clinic:</b> {{ doctor.clinic_name }}</p>
-
-<p><b>Address:</b> {{ doctor.clinic_address }}</p>
-
-</div>
-
-<!-- ================= DASHBOARD BUTTONS ================= -->
-
-<div class="dashboard-buttons">
-
-<a href="/appointments" class="btn appointment-btn">
-    📅 Appointments
-
-    {% if pending_appointments > 0 %}
-    <span class="notification-dot"></span>
-    {% endif %}
-</a>
-
-<a href="/appointment_calendar" class="btn">
-    📅 See Calendar
-</a>
-
-</div>
-
-<!-- ================= STATS ================= -->
-
-<div class="stats-container">
-
-<div class="card stat-card blue">
-    <h3>Total Patients</h3>
-    <h1>{{ total_patients }}</h1>
-</div>
-
-<div class="card stat-card green">
-    <h3>Total Visits</h3>
-    <h1>{{ total_visits }}</h1>
-</div>
-
-</div>
-
-<!-- ================= RECENT PATIENTS ================= -->
-
-<div class="card">
-
-<h3>🆕 Recently Added Patients</h3>
-
-<table class="patient-table">
-
-    <tr>
-        <th>Name</th>
-        <th>Age</th>
-        <th>Phone</th>
-    </tr>
-
-    {% for patient in recent_patients %}
-    <tr>
-        <td>{{ patient.name }}</td>
-        <td>{{ patient.age }}</td>
-        <td>{{ patient.phone }}</td>
-    </tr>
-    {% endfor %}
-
-</table>
-
-</div>
-
-<!-- ================= STYLES ================= -->
 
 <style>
 
-.dashboard-buttons{
-display:flex;
-gap:15px;
-margin:20px 0;
-flex-wrap:wrap;
+/* ================================================= */
+/* ================= DASHBOARD ===================== */
+/* ================================================= */
+
+.dashboard-wrapper{
+    width:100%;
 }
 
-/* Stat Cards */
+/* ================================================= */
+/* ================= HEADER ======================== */
+/* ================================================= */
 
-.stats-container{
-display:flex;
-gap:20px;
-flex-wrap:wrap;
-margin-bottom:20px;
+.dd-header{
+    background:white;
+
+    padding:30px;
+
+    border-radius:24px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:20px;
+
+    flex-wrap:wrap;
+
+    box-shadow:0 8px 25px rgba(0,0,0,0.08);
+
+    margin-bottom:25px;
 }
 
-.stat-card{
-flex:1;
-text-align:center;
-color:white;
+/* Welcome */
+
+.dd-welcome h1{
+    font-size:38px;
+
+    color:#163b70;
+
+    margin-bottom:14px;
+
+    line-height:1.3;
 }
 
-.blue{
-background:linear-gradient(135deg,#1e3c72,#2a5298);
+.dd-welcome p{
+    font-size:18px;
+
+    color:#444;
+
+    line-height:1.8;
 }
 
-.green{
-background:linear-gradient(135deg,#11998e,#38ef7d);
+/* ================================================= */
+/* ================= ACTIONS ======================= */
+/* ================================================= */
+
+.dd-actions{
+    display:flex;
+
+    gap:15px;
+
+    flex-wrap:wrap;
 }
 
-/* Table */
+.dd-action-btn{
+    text-decoration:none;
 
-.patient-table{
-width:100%;
-border-collapse:collapse;
-margin-top:10px;
+    color:white;
+
+    padding:16px 22px;
+
+    border-radius:18px;
+
+    font-size:17px;
+
+    font-weight:bold;
+
+    transition:0.3s;
+
+    position:relative;
 }
 
-.patient-table th,
-.patient-table td{
-padding:12px;
-border-bottom:1px solid #ddd;
-text-align:left;
+.dd-action-btn:hover{
+    transform:translateY(-3px);
 }
 
-/* Appointment button */
+/* Buttons */
 
-.appointment-btn{
-position:relative;
-background:#3a5a94;
-color:white;
+.dd-blue{
+    background:linear-gradient(135deg,#1e3c72,#2a5298);
 }
 
-/* Red notification dot */
+.dd-green{
+    background:linear-gradient(135deg,#00b894,#00cec9);
+}
 
-.notification-dot{
-position:absolute;
-top:-5px;
-right:-5px;
-width:12px;
-height:12px;
-background:red;
-border-radius:50%;
+/* Notification */
+
+.dd-dot{
+    position:absolute;
+
+    top:8px;
+    right:10px;
+
+    width:13px;
+    height:13px;
+
+    background:red;
+
+    border-radius:50%;
+}
+
+/* ================================================= */
+/* ================= STATS ========================= */
+/* ================================================= */
+
+.dd-stats{
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+
+    gap:22px;
+
+    margin-bottom:25px;
+}
+
+.dd-stat-box{
+    padding:35px 25px;
+
+    border-radius:24px;
+
+    color:white;
+
+    box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+
+.dd-stat-box h3{
+    font-size:24px;
+
+    margin-bottom:12px;
+}
+
+.dd-stat-box h1{
+    font-size:58px;
+}
+
+/* Colors */
+
+.dd-stat-blue{
+    background:linear-gradient(135deg,#1e3c72,#2a5298);
+}
+
+.dd-stat-green{
+    background:linear-gradient(135deg,#11998e,#38ef7d);
+}
+
+/* ================================================= */
+/* ================= PATIENTS ====================== */
+/* ================================================= */
+
+.dd-patients{
+    background:white;
+
+    padding:30px;
+
+    border-radius:24px;
+
+    box-shadow:0 8px 25px rgba(0,0,0,0.08);
+}
+
+.dd-patients h2{
+    font-size:30px;
+
+    color:#163b70;
+
+    margin-bottom:25px;
+}
+
+/* Patient Grid */
+
+.dd-patient-grid{
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+
+    gap:22px;
+}
+
+/* Patient Card */
+
+.dd-patient-card{
+    background:#f7faff;
+
+    padding:24px;
+
+    border-radius:22px;
+
+    border-left:6px solid #163b70;
+
+    transition:0.3s;
+}
+
+.dd-patient-card:hover{
+    transform:translateY(-4px);
+}
+
+.dd-patient-card h3{
+    color:#163b70;
+
+    margin-bottom:14px;
+
+    font-size:24px;
+}
+
+.dd-patient-card p{
+    font-size:17px;
+
+    color:#444;
+
+    margin-bottom:10px;
+
+    line-height:1.6;
+}
+
+/* ================================================= */
+/* ================= MOBILE ======================== */
+/* ================================================= */
+
+@media(max-width:900px){
+
+/* Header */
+
+.dd-header{
+    flex-direction:column;
+
+    align-items:flex-start;
+
+    padding:24px 20px;
+}
+
+/* Welcome */
+
+.dd-welcome h1{
+    font-size:32px;
+}
+
+.dd-welcome p{
+    font-size:18px;
+}
+
+/* Buttons */
+
+.dd-actions{
+    width:100%;
+
+    flex-direction:column;
+}
+
+.dd-action-btn{
+    width:100%;
+
+    text-align:center;
+
+    font-size:18px;
+
+    padding:18px;
+}
+
+/* Stats */
+
+.dd-stat-box{
+    padding:30px 22px;
+}
+
+.dd-stat-box h3{
+    font-size:24px;
+}
+
+.dd-stat-box h1{
+    font-size:50px;
+}
+
+/* Patients */
+
+.dd-patients{
+    padding:22px;
+}
+
+.dd-patients h2{
+    text-align:center;
+
+    font-size:28px;
+}
+
+.dd-patient-grid{
+    grid-template-columns:1fr;
+}
+
+.dd-patient-card{
+    padding:24px;
+}
+
+.dd-patient-card h3{
+    font-size:24px;
+}
+
+.dd-patient-card p{
+    font-size:18px;
+}
+
+}
+
+/* ================================================= */
+/* ================= SMALL DEVICES ================= */
+/* ================================================= */
+
+@media(max-width:480px){
+
+.dd-header{
+    padding:20px 18px;
+}
+
+.dd-welcome h1{
+    font-size:28px;
+}
+
+.dd-welcome p{
+    font-size:16px;
+}
+
+.dd-action-btn{
+    font-size:17px;
+
+    padding:16px;
+}
+
+.dd-stat-box h3{
+    font-size:22px;
+}
+
+.dd-stat-box h1{
+    font-size:42px;
+}
+
+.dd-patients h2{
+    font-size:24px;
+}
+
+.dd-patient-card h3{
+    font-size:22px;
+}
+
+.dd-patient-card p{
+    font-size:16px;
+}
+
 }
 
 </style>
+
+<!-- ================================================= -->
+<!-- ================= DASHBOARD ==================== -->
+<!-- ================================================= -->
+
+<div class="dashboard-wrapper">
+
+<!-- ================================================= -->
+<!-- ================= HEADER ======================= -->
+<!-- ================================================= -->
+
+<div class="dd-header">
+
+<div class="dd-welcome">
+
+<h1>
+Welcome Dr. {{ doctor.name }}
+</h1>
+
+<p>
+<b>Clinic:</b> {{ doctor.clinic_name }}
+
+<br><br>
+
+<b>Address:</b> {{ doctor.clinic_address }}
+</p>
+
+</div>
+
+<!-- Actions -->
+
+<div class="dd-actions">
+
+<a href="/appointments"
+class="dd-action-btn dd-blue">
+
+📅 Appointments
+
+{% if pending_appointments > 0 %}
+<span class="dd-dot"></span>
+{% endif %}
+
+</a>
+
+<a href="/appointment_calendar"
+class="dd-action-btn dd-green">
+
+🗓 See Calendar
+
+</a>
+
+</div>
+
+</div>
+
+<!-- ================================================= -->
+<!-- ================= STATS ======================== -->
+<!-- ================================================= -->
+
+<div class="dd-stats">
+
+<!-- Patients -->
+
+<div class="dd-stat-box dd-stat-blue">
+
+<h3>Total Patients</h3>
+
+<h1>{{ total_patients }}</h1>
+
+</div>
+
+<!-- Visits -->
+
+<div class="dd-stat-box dd-stat-green">
+
+<h3>Total Visits</h3>
+
+<h1>{{ total_visits }}</h1>
+
+</div>
+
+</div>
+
+<!-- ================================================= -->
+<!-- ================= PATIENTS ===================== -->
+<!-- ================================================= -->
+
+<div class="dd-patients">
+
+<h2>
+🆕 Recently Added Patients
+</h2>
+
+<div class="dd-patient-grid">
+
+{% for patient in recent_patients %}
+
+<div class="dd-patient-card">
+
+<h3>{{ patient.name }}</h3>
+
+<p>
+<b>Age:</b> {{ patient.age }}
+</p>
+
+<p>
+<b>Phone:</b> {{ patient.phone }}
+</p>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+
+</div>
 
 {% endblock %}
