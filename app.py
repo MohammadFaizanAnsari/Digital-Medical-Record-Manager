@@ -514,9 +514,8 @@ def view_appointments():
     return render_template("appointments.html", appointments=appointments)
 
 # ---------------- APPROVE APPOINTMENT ----------------
-@app.route("/approve_appointment/<int:id>")
+@app.route("/appointments/<int:id>/approve", methods=["POST"])
 def approve_appointment(id):
-    # FIXED: Check role against 'admin' to match the doctor session login rules
     if not is_logged_in() or session.get("role") != "admin":
         return redirect("/login")
 
@@ -524,7 +523,7 @@ def approve_appointment(id):
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     
-    # FIXED: Added SQL Join to grab variables inside the local route block safely
+    # Fetch data safely using explicit JOIN mapping
     cur.execute("""
         SELECT a.requested_date, p.name, p.email 
         FROM appointments a 
@@ -533,6 +532,7 @@ def approve_appointment(id):
     """, (id,))
     appointment_data = cur.fetchone()
 
+    # Update status to approved
     cur.execute("UPDATE appointments SET status='approved' WHERE id=?", (id,))
     conn.commit()
 
@@ -558,10 +558,10 @@ def approve_appointment(id):
     conn.close()
     return redirect("/appointments")
 
+
 # ---------------- REJECT APPOINTMENT ----------------
-@app.route("/reject_appointment/<int:id>")
+@app.route("/appointments/<int:id>/reject", methods=["POST"])
 def reject_appointment(id):
-    # FIXED: Check role against 'admin' to match the doctor session login rules
     if not is_logged_in() or session.get("role") != "admin":
         return redirect("/login")
 
@@ -569,7 +569,7 @@ def reject_appointment(id):
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     
-    # FIXED: Added SQL Join to grab variables inside the local route block safely
+    # Fetch data safely using explicit JOIN mapping
     cur.execute("""
         SELECT p.name, p.email 
         FROM appointments a 
@@ -578,6 +578,7 @@ def reject_appointment(id):
     """, (id,))
     appointment_data = cur.fetchone()
 
+    # Update status to rejected
     cur.execute("UPDATE appointments SET status='rejected' WHERE id=?", (id,))
     conn.commit()
 
