@@ -9,25 +9,34 @@ import threading
 import smtplib
 from email.mime.text import MIMEText
 
-EMAIL_ADDRESS = "fa735594@gmail.com"
-EMAIL_PASSWORD = "krfm bkgo ihnc ptyn"
+def send_email(to_email, subject, body):
+    # Your explicit Mailtrap developer sandbox credentials
+    smtp_user = "11e492c500c8ae"
+    smtp_pass = "81403b83b413e3"  # Fixed with your exact unhidden password
 
-def send_email(to_email, subject, message):
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = "portal@yourclinic.com"
+    msg["To"] = to_email
+
     try:
-        msg = MIMEText(message)
-        msg['Subject'] = subject
-        msg['From'] = EMAIL_ADDRESS
-        msg['To'] = to_email.strip()
-
-        print(f"📡 [SMTP CONNECT] Connecting to Gmail for: {to_email.strip()}...")
-        # Using port 587 with starttls ensures cloud provider firewalls don't silently block the connection
-        with smtplib.SMTP('smtp.gmail.com', 587, timeout=15) as smtp:
-            smtp.starttls()
-            smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-            smtp.send_message(msg)
-        print(f"✅ [SMTP SUCCESS] Message delivered successfully to {to_email.strip()}")
+        print(f"📡 [MAILTRAP CONNECT] Connecting to sandbox via Port 2525...")
+        # Port 2525 completely bypasses Render cloud network blocks!
+        server = smtplib.SMTP("sandbox.smtp.mailtrap.io", 2525, timeout=15)
+        server.starttls()  # Initialize STARTTLS encryption layer
+        
+        print("🔐 [MAILTRAP AUTH] Authenticating sandbox token credentials...")
+        server.login(smtp_user, smtp_pass)
+        
+        print("📤 [MAILTRAP DISPATCH] Handing message payload over to Mailtrap server...")
+        server.sendmail("portal@yourclinic.com", [to_email], msg.as_string())
+        server.quit()
+        
+        print(f"✅ [MAILTRAP SUCCESS] Catchment completed for: {to_email}!")
+        return True
     except Exception as e:
-        print(f"❌ [SMTP ERROR] Failed to send email to {to_email.strip()}: {e}")
+        print(f"❌ [MAILTRAP ERROR] Connection dropped out! Details: {str(e)}")
+        return False
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
