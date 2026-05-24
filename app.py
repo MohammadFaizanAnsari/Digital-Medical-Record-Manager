@@ -17,14 +17,17 @@ def send_email(to_email, subject, message):
         msg = MIMEText(message)
         msg['Subject'] = subject
         msg['From'] = EMAIL_ADDRESS
-        msg['To'] = to_email
+        msg['To'] = to_email.strip()
 
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+        print(f"📡 [SMTP CONNECT] Connecting to Gmail for: {to_email.strip()}...")
+        # Using port 587 with starttls ensures cloud provider firewalls don't silently block the connection
+        with smtplib.SMTP('smtp.gmail.com', 587, timeout=15) as smtp:
+            smtp.starttls()
             smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
             smtp.send_message(msg)
-        print(f"✅ Asynchronous email successfully dispatched to {to_email}")
+        print(f"✅ [SMTP SUCCESS] Message delivered successfully to {to_email.strip()}")
     except Exception as e:
-        print(f"❌ Failed to send email to {to_email}: {e}")
+        print(f"❌ [SMTP ERROR] Failed to send email to {to_email.strip()}: {e}")
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -435,6 +438,7 @@ def patient_dashboard():
         except Exception as e:
             print(f"Error calculating alerts for {med['medicine_name']}: {e}")
 
+    # Fetches all submitted requests for display in the table
     cur.execute("SELECT * FROM appointments WHERE patient_id=? ORDER BY id DESC", (patient_id,))
     appointments = cur.fetchall()
     
@@ -477,18 +481,14 @@ def request_appointment():
 
         patient_email = patient["email"]
         patient_name = patient["name"]
-        subject = "Appointment Request Received"
-        message = f"Hello {patient_name},\n\nYour appointment request for {requested_date} has been received.\n\nThank you!"
+        
+        subject = "Appointment Request Received Successfully"
+        message = f"Hello {patient_name},\n\nYour appointment request for {requested_date} has been received successfully.\n\nThank you!"
 
-        if patient_email and "@" in patient_email:
-            try:
-                email_worker = threading.Thread(
-                    target=send_email, 
-                    args=(patient_email, subject, message)
-                )
-                email_worker.start()
-            except Exception as e:
-                print(f"⚠️ Error launching background email thread: {e}")
+        if patient_email and "@" in str(patient_email):
+            t = threading.Thread(target=send_email, args=(patient_email, subject, message))
+            t.daemon = True
+            t.start()
 
         flash("Appointment requested successfully!")
         conn.close()
@@ -523,7 +523,6 @@ def approve_appointment(id):
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     
-    # Fetch data safely using explicit JOIN mapping
     cur.execute("""
         SELECT a.requested_date, p.name, p.email 
         FROM appointments a 
@@ -532,7 +531,6 @@ def approve_appointment(id):
     """, (id,))
     appointment_data = cur.fetchone()
 
-    # Update status to approved
     cur.execute("UPDATE appointments SET status='approved' WHERE id=?", (id,))
     conn.commit()
 
@@ -541,23 +539,17 @@ def approve_appointment(id):
         patient_name = appointment_data["name"]
         requested_date = appointment_data["requested_date"]
 
-        subject = "Appointment Confirmed!"
-        message = f"Hello {patient_name},\n\nYour appointment request for {requested_date} has been officially APPROVED by the doctor."
+        subject = "Appointment Approved Successfully"
+        message = f"Hello {patient_name},\n\nYour appointment request for {requested_date} has been approved successfully."
 
-        if patient_email and "@" in patient_email:
-            try:
-                email_worker = threading.Thread(
-                    target=send_email, 
-                    args=(patient_email, subject, message)
-                )
-                email_worker.start()
-            except Exception as e:
-                print(f"⚠️ Error launching background email thread: {e}")
+        if patient_email and "@" in str(patient_email):
+            t = threading.Thread(target=send_email, args=(patient_email, subject, message))
+            t.daemon = True
+            t.start()
 
     flash("Appointment approved successfully!")
     conn.close()
     return redirect("/appointments")
-
 
 # ---------------- REJECT APPOINTMENT ----------------
 @app.route("/appointments/<int:id>/reject", methods=["POST"])
@@ -569,35 +561,41 @@ def reject_appointment(id):
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     
-    # Fetch data safely using explicit JOIN mapping
     cur.execute("""
-        SELECT p.name, p.email 
+        SELECT p.id as patient_db_id, p.name, p.email, a.requested_date
         FROM appointments a 
         JOIN patients p ON a.patient_id = p.id 
         WHERE a.id = ?
     """, (id,))
     appointment_data = cur.fetchone()
 
-    # Update status to rejected
     cur.execute("UPDATE appointments SET status='rejected' WHERE id=?", (id,))
     conn.commit()
 
     if appointment_data:
         patient_email = appointment_data["email"]
         patient_name = appointment_data["name"]
+        patient_id = appointment_data["patient_db_id"]
 
-        subject = "Appointment Update"
-        message = f"Hello {patient_name},\n\nWe regret to inform you that your appointment request could not be accommodated at this time."
+        # Dynamically build the auto-login dashboard redirect link
+        # request.host_url automatically switches between localhost and your live Render domain
+        direct_link = f"{request.host_url.rstrip('/')}/patient_auto_login/{patient_id}"
 
-        if patient_email and "@" in patient_email:
-            try:
-                email_worker = threading.Thread(
-                    target=send_email, 
-                    args=(patient_email, subject, message)
-                )
-                email_worker.start()
-            except Exception as e:
-                print(f"⚠️ Error launching background email thread: {e}")
+        subject = "Appointment Request Update - Rejected"
+        
+        message = (
+            f"Hello {patient_name},\n\n"
+            f"Your selected date slot reached maximum appointments so your request is rejected.\n\n"
+            f"Please Choose another date from link below:\n"
+            f"{direct_link}\n\n"
+            f"Thank you,\nClinical Administration"
+        )
+
+        print(f"👉 [EMAIL TRACKER] Outbound rejection auto-link dispatch to: {patient_email}")
+        if patient_email and "@" in str(patient_email):
+            t = threading.Thread(target=send_email, args=(patient_email, subject, message))
+            t.daemon = True
+            t.start()
 
     flash("Appointment rejected.")
     conn.close()
@@ -729,7 +727,6 @@ def check_medicine_refills():
 
             if 0 <= days_left <= 3 and is_reminder_sent == 0:
                 subject = "Prescription Course Concluding Soon"
-                # FIXED: Stripped out broken 127.0.0.1 hardcoded string pointers for live production
                 message = f"Hello {med['patient_name']},\n\nThis is an automated reminder that your prescribed course for '{med['medicine_name']}' will conclude in {days_left} day(s).\n\nPlease open your portal application dashboard to check your schedule status configuration updates.\n\nThank you,\nDigital Medical Record System"
 
                 if med["email"] and "@" in med["email"]:
