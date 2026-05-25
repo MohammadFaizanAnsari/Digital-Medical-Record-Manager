@@ -5,43 +5,23 @@ from datetime import datetime, timedelta
 import schedule
 import time
 import threading
-
-import smtplib
-from email.mime.text import MIMEText
-
-import smtplib
-from email.mime.text import MIMEText
+import resend
 
 def send_email(to_email, subject, body):
-    # These will look for the keys you add in the Render Dashboard
-    smtp_user = os.environ.get("MAIL_USERNAME")
-    smtp_pass = os.environ.get("MAIL_PASSWORD")
-
-    if not smtp_user or not smtp_pass:
-        print("❌ [ERROR] Email credentials not found in Environment Variables!")
-        return False
-
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = smtp_user
-    msg["To"] = to_email
-
+    resend.api_key = os.environ.get("RESEND_API_KEY")
+    
     try:
-        print(f"📡 [GMAIL CONNECT] Connecting to Gmail...")
-        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=15)
-        server.starttls()
-        
-        print("🔐 [GMAIL AUTH] Authenticating...")
-        server.login(smtp_user, smtp_pass)
-        
-        print(f"📤 [GMAIL SEND] Sending to: {to_email}")
-        server.sendmail(smtp_user, [to_email], msg.as_string())
-        server.quit()
-        
-        print(f"✅ [SUCCESS] Email delivered to {to_email}!")
+        params = {
+            "from": "onboarding@resend.dev",
+            "to": to_email,
+            "subject": subject,
+            "text": body
+        }
+        r = resend.Emails.send(params)
+        print(f"✅ [SUCCESS] Email sent via Resend: {r['id']}")
         return True
     except Exception as e:
-        print(f"❌ [LIVE ERROR] Gmail rejected connection: {str(e)}")
+        print(f"❌ [ERROR] Resend failed: {str(e)}")
         return False
 
 app = Flask(__name__)
