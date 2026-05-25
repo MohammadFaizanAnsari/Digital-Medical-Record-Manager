@@ -1,38 +1,312 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMRM</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* ================================================= */
+        /* ================= DESIGN SYSTEM VARIABLES ======= */
+        /* ================================================= */
+        :root {
+            --dm-brand: #163b70;
+            --dm-brand-gradient: linear-gradient(135deg, #163b70 0%, #1e4f94 100%);
+            --dm-canvas: #f8fafc;
+            --dm-surface: #ffffff;
+            --dm-text-main: #0f172a;
+            --dm-text-muted: #64748b;
+            --dm-border: #e2e8f0;
+            --dm-sidebar-width: 280px;
+            
+            /* Interactive State Mechanics */
+            --dm-nav-hover-bg: rgba(255, 255, 255, 0.08);
+            --dm-nav-active-bg: #ffffff;
+            --dm-nav-active-text: #163b70;
+            
+            --dm-radius: 12px;
+            --dm-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
+            --dm-shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+            --dm-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-<meta charset="UTF-8">
+        /* Reset & Core Setup */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--dm-canvas);
+            color: var(--dm-text-main);
+            min-height: 100vh;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
 
-<title>DMRM</title>
+        /* ================================================= */
+        /* ================= APP CORE LAYOUT ROUTER ======== */
+        /* ================================================= */
+        .layout {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
 
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        /* ================================================= */
+        /* ================= DESKTOP SIDEBAR NAVIGATION ===== */
+        /* ================================================= */
+        .sidebar {
+            width: var(--dm-sidebar-width);
+            background: var(--dm-brand-gradient);
+            padding: 32px 20px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            z-index: 100;
+            box-shadow: 4px 0 24px rgba(22, 59, 112, 0.1);
+            transition: var(--dm-transition);
+        }
 
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        /* Sidebar Logo Branding Frame */
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.03em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            padding-left: 8px;
+        }
 
+        .logo span {
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        /* Navigation Links Architecture */
+        .sidebar-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .sidebar-links a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: rgba(255, 255, 255, 0.75);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 12px 16px;
+            border-radius: var(--dm-radius);
+            transition: var(--dm-transition);
+        }
+
+        /* Hover States Framework */
+        .sidebar-links a:hover {
+            color: #ffffff;
+            background-color: var(--dm-nav-hover-bg);
+            transform: translateX(4px);
+        }
+
+        /* Active Navigation Link Highlighting */
+        .sidebar-links a.active,
+        .sidebar-links a[href="{{ request.path }}"] {
+            color: var(--dm-nav-active-text);
+            background-color: var(--dm-nav-active-bg);
+            box-shadow: var(--dm-shadow-md);
+            transform: none;
+        }
+
+        .sidebar-links a i {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+            transition: var(--dm-transition);
+        }
+
+        /* Mobile Header Top-Bar Interface Base Configuration (Hidden on Desktops) */
+        .mobile-header-bar {
+            display: none;
+            background: var(--dm-brand-gradient);
+            width: 100%;
+            height: 64px;
+            padding: 0 20px;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 200;
+            box-shadow: 0 4px 12px rgba(22, 59, 112, 0.1);
+        }
+
+        .mobile-header-bar .logo {
+            margin-bottom: 0;
+            font-size: 20px;
+            padding-left: 0;
+        }
+
+        .menu-toggle-btn {
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-size: 22px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: var(--dm-transition);
+        }
+
+        .menu-toggle-btn:hover {
+            background: var(--dm-nav-hover-bg);
+        }
+
+        /* ================================================= */
+        /* ================= MAIN CONTENT WORKSPACE AREA ===== */
+        /* ================================================= */
+        .main-content {
+            flex-grow: 1;
+            min-width: 0; /* Prevent layout blowout from child elements */
+            padding: 40px;
+            background-color: var(--dm-canvas);
+            transition: var(--dm-transition);
+        }
+
+        /* ================================================= */
+        /* ================= FLASH ALERTS SYSTEMS ========== */
+        /* ================================================= */
+        .flash-message {
+            margin-bottom: 32px;
+            animation: slideInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .flash-message p {
+            background: var(--dm-surface);
+            color: var(--dm-text-main);
+            border-left: 4px solid var(--dm-brand);
+            padding: 16px 20px;
+            border-radius: 0 var(--dm-radius) var(--dm-radius) 0;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: var(--dm-shadow-sm);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .flash-message p::before {
+            content: "\f05a";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: var(--dm-brand);
+            font-size: 16px;
+        }
+
+        @keyframes slideInDown {
+            from { transform: translateY(-12px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* ================================================= */
+        /* ================= INTERACTIVE DYNAMIC RESPONSIVE = */
+        /* ================================================= */
+        @media (max-width: 992px) {
+            .layout {
+                flex-direction: column;
+            }
+
+            /* Shift Desktop Sidebar to Mobile Off-Canvas Sidebar Overlay Drawer */
+            .sidebar {
+                position: fixed;
+                top: 64px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 64px);
+                padding: 24px;
+                z-index: 150;
+                box-shadow: none;
+            }
+
+            /* State class to slide out mobile navigation menu dynamically */
+            .sidebar.mobile-open {
+                left: 0;
+            }
+
+            .sidebar .logo {
+                display: none; /* Already present in static top header-bar */
+            }
+
+            .mobile-header-bar {
+                display: flex;
+            }
+
+            .main-content {
+                padding: 24px;
+                margin-top: 64px; /* Clearance for fixed top nav-bar */
+            }
+        }
+
+:root {
+    --primary: #1e3a8a; /* Deep Navy */
+    --accent: #3b82f6;  /* Soft Blue */
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+}
+
+body { background-color: var(--bg); font-family: 'Inter', sans-serif; color: var(--text-dark); margin: 0; }
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+/* Professional Cards */
+.card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+
+/* Buttons */
+.btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; text-decoration: none; display: inline-block; }
+.btn-primary { background: var(--primary); color: white; }
+
+/* Responsive Grid */
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+
+    </style>
 </head>
-
 <body>
 
 <div class="layout">
 
-    <!-- ================================================= -->
-    <!-- ================= SIDEBAR ======================= -->
-    <!-- ================================================= -->
-
-    <div class="sidebar">
-
-        <!-- Logo -->
-
+    <div class="mobile-header-bar">
         <h2 class="logo">
             🏥 <span>DMRM</span>
         </h2>
+        <button class="menu-toggle-btn" id="mobileMenuTrigger" aria-label="Toggle Navigation Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
 
-        <!-- Navigation -->
+    <div class="sidebar" id="appSidebar">
+        
+        <h2 class="logo">
+            🏥 <span>DMRM</span>
+        </h2>
 
         <div class="sidebar-links">
 
@@ -62,7 +336,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 
             {% endif %}
 
-            <a href="{{ url_for('logout') }}">
+            <a href="{{ url_for('logout') }}" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 20px; border-radius: 0;">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 Logout
             </a>
@@ -71,23 +345,15 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 
     </div>
 
-    <!-- ================================================= -->
-    <!-- ================= MAIN CONTENT ================== -->
-    <!-- ================================================= -->
-
     <div class="main-content">
 
         {% with messages = get_flashed_messages() %}
         {% if messages %}
-
         <div class="flash-message">
-
             {% for message in messages %}
             <p>{{ message }}</p>
             {% endfor %}
-
         </div>
-
         {% endif %}
         {% endwith %}
 
@@ -97,6 +363,35 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 
 </div>
 
-</body>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuTrigger = document.getElementById('mobileMenuTrigger');
+    const appSidebar = document.getElementById('appSidebar');
+    
+    if (menuTrigger && appSidebar) {
+        menuTrigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            appSidebar.classList.toggle('mobile-open');
+            
+            // Switch responsive toggle menu asset icons smoothly
+            const toggleIcon = menuTrigger.querySelector('i');
+            if(appSidebar.classList.contains('mobile-open')) {
+                toggleIcon.className = 'fa-solid fa-xmark';
+            } else {
+                toggleIcon.className = 'fa-solid fa-bars';
+            }
+        });
+        
+        // Auto close side drawers when clicking structural main layout layers
+        document.querySelector('.main-content').addEventListener('click', function() {
+            if(appSidebar.classList.contains('mobile-open')) {
+                appSidebar.classList.remove('mobile-open');
+                menuTrigger.querySelector('i').className = 'fa-solid fa-bars';
+            }
+        });
+    }
+});
+</script>
 
+</body>
 </html>

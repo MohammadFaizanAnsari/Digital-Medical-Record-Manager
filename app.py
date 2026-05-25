@@ -9,33 +9,36 @@ import threading
 import smtplib
 from email.mime.text import MIMEText
 
+import smtplib
+from email.mime.text import MIMEText
+
 def send_email(to_email, subject, body):
-    # Your explicit Mailtrap developer sandbox credentials
-    smtp_user = "11e492c500c8ae"
-    smtp_pass = "81403b83b413e3"  # Fixed with your exact unhidden password
+    # USE YOUR REAL GMAIL AND APP PASSWORD HERE
+    smtp_user = "fa735594@gmail.com"  
+    smtp_pass = "nkeywhmgqizhozbd"  # Combined into one single 16-letter string!
 
     msg = MIMEText(body)
     msg["Subject"] = subject
-    msg["From"] = "portal@yourclinic.com"
+    msg["From"] = smtp_user
     msg["To"] = to_email
 
     try:
-        print(f"📡 [MAILTRAP CONNECT] Connecting to sandbox via Port 2525...")
-        # Port 2525 completely bypasses Render cloud network blocks!
-        server = smtplib.SMTP("sandbox.smtp.mailtrap.io", 2525, timeout=15)
-        server.starttls()  # Initialize STARTTLS encryption layer
+        print(f"📡 [GMAIL CONNECT] Connecting to Gmail Production via Port 587...")
+        # Port 587 is the standard for live web app delivery
+        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=15)
+        server.starttls()  # Secure connection
         
-        print("🔐 [MAILTRAP AUTH] Authenticating sandbox token credentials...")
+        print("🔐 [GMAIL AUTH] Logging in with App Password...")
         server.login(smtp_user, smtp_pass)
         
-        print("📤 [MAILTRAP DISPATCH] Handing message payload over to Mailtrap server...")
-        server.sendmail("portal@yourclinic.com", [to_email], msg.as_string())
+        print(f"📤 [GMAIL SEND] Sending live email to: {to_email}...")
+        server.sendmail(smtp_user, [to_email], msg.as_string())
         server.quit()
         
-        print(f"✅ [MAILTRAP SUCCESS] Catchment completed for: {to_email}!")
+        print(f"✅ [LIVE SUCCESS] Email delivered to real inbox: {to_email}!")
         return True
     except Exception as e:
-        print(f"❌ [MAILTRAP ERROR] Connection dropped out! Details: {str(e)}")
+        print(f"❌ [LIVE ERROR] Gmail rejected connection: {str(e)}")
         return False
 
 app = Flask(__name__)
@@ -506,7 +509,7 @@ def request_appointment():
     return render_template("request_appointment.html", patient=patient)
 
 
-# ---------------- VIEW APPOINTMENTS ----------------
+# ---------------- VIEW APPOINTMENTS (ADMIN) ----------------
 @app.route("/appointments")
 def view_appointments():
     if not is_logged_in() or session.get("role") != "admin":
@@ -514,12 +517,7 @@ def view_appointments():
 
     doctor_id = session.get("doctor_id")
     conn = sqlite3.connect(DATABASE, timeout=20)
-    
-    # CRITICAL: Do NOT use row_factory = sqlite3.Row if your template expects 
-    # tuple indices like app[0], app[1], app[3], app[4], app[5]
     cur = conn.cursor()
-
-    # Matches database index lookup mapping used in appointments.html template
     cur.execute("""
         SELECT id, patient_id, doctor_id, patient_name, requested_date, status 
         FROM appointments 
@@ -530,16 +528,19 @@ def view_appointments():
     conn.close()
     return render_template("appointments.html", appointments=appointments)
 
+
 # ---------------- APPROVE APPOINTMENT ----------------
 @app.route("/appointments/<int:id>/approve", methods=["POST"])
 def approve_appointment(id):
     if not is_logged_in() or session.get("role") != "admin":
         return redirect("/login")
 
+    print(f"🔍 [DEBUG APPROVE] Processing appointment ID: {id}")
     conn = sqlite3.connect(DATABASE, timeout=20)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     
+    # Selecting columns explicitly 
     cur.execute("""
         SELECT a.requested_date, p.name, p.email 
         FROM appointments a 
@@ -556,16 +557,23 @@ def approve_appointment(id):
         patient_name = appointment_data["name"]
         requested_date = appointment_data["requested_date"]
 
+        print(f"📋 [DEBUG DB DATA] Patient Name: {patient_name}, Email found in DB: '{patient_email}'")
+
         subject = "Appointment Approved Successfully"
         message = f"Hello {patient_name},\n\nYour appointment request for {requested_date} has been approved successfully."
 
         if patient_email and "@" in str(patient_email):
-            # Process directly in-line to prevent Render thread lifecycle cutoff
+            print(f"🚀 [DEBUG TRIGGER] Condition met! Attempting email delivery to: {patient_email}")
             send_email(patient_email, subject, message)
+        else:
+            print("⚠️ [DEBUG SKIP] Email was skipped because string format was invalid or empty!")
+    else:
+        print("❌ [DEBUG ERROR] Could not find any matching patient appointment data in database query!")
 
     flash("Appointment approved successfully!")
     conn.close()
     return redirect("/appointments")
+
 
 # ---------------- REJECT APPOINTMENT ----------------
 @app.route("/appointments/<int:id>/reject", methods=["POST"])
@@ -573,6 +581,7 @@ def reject_appointment(id):
     if not is_logged_in() or session.get("role") != "admin":
         return redirect("/login")
 
+    print(f"🔍 [DEBUG REJECT] Processing appointment ID: {id}")
     conn = sqlite3.connect(DATABASE, timeout=20)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
@@ -593,60 +602,69 @@ def reject_appointment(id):
         patient_name = appointment_data["name"]
         patient_id = appointment_data["patient_db_id"]
 
-        # Dynamically build the absolute auto-login return loop path 
+        print(f"📋 [DEBUG DB DATA] Patient Name: {patient_name}, Email found in DB: '{patient_email}'")
+
         direct_link = f"{request.host_url.rstrip('/')}/patient_auto_login/{patient_id}"
         subject = "Appointment Request Update - Rejected"
         
         message = (
             f"Hello {patient_name},\n\n"
             f"Your selected date slot reached maximum appointments so your request is rejected.\n\n"
-            f"Please Choose another date from link below:\n"
+            f"Please Choose another date from the link below:\n"
             f"{direct_link}\n\n"
             f"Thank you,\nClinical Administration"
         )
 
         if patient_email and "@" in str(patient_email):
-            # Inline processing ensures network delivery succeeds on mobile and web viewports
+            print(f"🚀 [DEBUG TRIGGER] Condition met! Attempting email delivery to: {patient_email}")
             send_email(patient_email, subject, message)
+        else:
+            print("⚠️ [DEBUG SKIP] Email was skipped because string format was invalid or empty!")
+    else:
+        print("❌ [DEBUG ERROR] Could not find any matching patient appointment data in database query!")
 
     flash("Appointment rejected.")
     conn.close()
     return redirect("/appointments")
 
-# ---------------- APPOINTMENT CALENDAR PAGE ----------------
+# ---------------- APPOINTMENT CALENDAR VIEW ----------------
 @app.route("/appointment_calendar")
-def appointment_calendar():
+def appointment_calendar_view():
     if not is_logged_in() or session.get("role") != "admin":
         return redirect("/login")
     return render_template("appointment_calendar.html")
 
 # ---------------- CALENDAR DATA ----------------
-@app.route("/appointment_calendar_data")
-def appointment_calendar_data():
-    if not is_logged_in() or session.get("role") != "admin":
-        return redirect("/login")
-
+@app.route("/calendar_data")
+def calendar_data():
     doctor_id = session.get("doctor_id")
-    conn = sqlite3.connect(DATABASE, timeout=20)
+    conn = sqlite3.connect(DATABASE)
     cur = conn.cursor()
-
     cur.execute("""
-        SELECT requested_date, COUNT(*) FROM appointments
-        WHERE status != 'rejected' AND doctor_id=?
+        SELECT requested_date, COUNT(*) as count 
+        FROM appointments 
+        WHERE doctor_id = ? AND status != 'rejected'
         GROUP BY requested_date
     """, (doctor_id,))
-    data = cur.fetchall()
-    conn.close()
-
+    
+    # Transform count into visual events
     events = []
-    for row in data:
+    for row in cur.fetchall():
+        date, count = row
+        # Color coding logic:
+        color = '#ef4444' if count > 8 else ('#eab308' if count >= 5 else '#22c55e')
         events.append({
-            "title": f"{row[1]} appointments",
-            "start": row[0],
-            "color": "green" if row[1] <= 2 else "orange" if row[1] <= 5 else "red"
+            "title": f"{count} Appts",
+            "start": date,
+            "backgroundColor": color,
+            "borderColor": color,
+            "textColor": "#ffffff",
+            "allDay": True
         })
+    conn.close()
     return jsonify(events)
 
+# ---------------- APPOINTMENTS BY DATE ----------------
 # ---------------- APPOINTMENTS BY DATE ----------------
 @app.route("/appointments_by_date")
 def appointments_by_date():
@@ -660,16 +678,20 @@ def appointments_by_date():
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
+    # --- UPDATED SQL QUERY ---
+    # Added 'a.patient_id' to the SELECT statement
     cur.execute("""
-        SELECT p.name, p.phone, a.status
+        SELECT p.name, p.phone, a.status, a.patient_id
         FROM appointments a
         JOIN patients p ON a.patient_id = p.id
         WHERE a.requested_date = ? AND a.status != 'rejected' AND a.doctor_id = ?
     """, (date, doctor_id))
+    
     rows = cur.fetchall()
     conn.close()
 
-    return {"appointments": [{"name": r["name"], "phone": r["phone"], "status": r["status"]} for r in rows]}
+    # Now r["patient_id"] will exist and the error will be gone
+    return {"appointments": [{"name": r["name"], "phone": r["phone"], "status": r["status"], "patient_id": r["patient_id"]} for r in rows]}
 
 # ---------------- ADD MEDICINE ----------------
 @app.route("/add_medicine/<int:patient_id>", methods=["POST"])

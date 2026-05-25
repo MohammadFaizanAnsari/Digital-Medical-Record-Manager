@@ -1,777 +1,754 @@
 {% extends "base.html" %}
 {% block content %}
 
-<link
-rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-/>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<link
-rel="stylesheet"
-href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css"
-/>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css"/>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <style>
-/* ================= MAIN ================= */
-body{
-    background:#f4f7fb;
-    overflow-x:hidden;
+/* ================================================= */
+/* ================= SYSTEM UI CONFIGURATIONS ====== */
+/* ================================================= */
+:root {
+    --pt-navy: #0f172a;
+    --pt-brand: #163b70;
+    --pt-brand-light: #f0f4fa;
+    --pt-border: #e2e8f0;
+    --pt-surface: #ffffff;
+    --pt-canvas: #f8fafc;
+    --pt-muted: #64748b;
+    
+    /* Strict Semantic Colors */
+    --pt-vital: #10b981;
+    --pt-vital-bg: #ecfdf5;
+    --pt-warn: #f59e0b;
+    --pt-warn-bg: #fffbeb;
+    --pt-crit: #ef4444;
+    --pt-crit-bg: #fef2f2;
+
+    --radius-premium: 16px;
+    --radius-pill: 9999px;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-card: 0 10px 15px -3px rgba(15, 23, 42, 0.04), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+    --shadow-glow: 0 0 0 4px rgba(22, 59, 112, 0.12);
+    
+    --fx-spring: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    --fx-smooth: all 0.2s ease;
 }
 
-/* ================= HERO PROFILE HEADER ================= */
-.patient-hero{
-    background:linear-gradient(135deg,#163b70,#2b5fad);
-    border-radius:32px;
-    padding:32px;
-    margin-bottom:24px;
-    color:white;
-    position:relative;
-    overflow:hidden;
-    box-shadow:0 12px 32px rgba(22,59,112,0.2);
+.portal-workspace-wrapper {
+    width: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    color: var(--pt-navy);
+    background-color: var(--pt-canvas);
+    box-sizing: border-box;
+    animation: portalIntro 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.patient-hero::before{
-    content:"";
-    position:absolute;
-    width:220px;
-    height:220px;
-    border-radius:50%;
-    background:rgba(255,255,255,0.06);
-    top:-90px;
-    right:-90px;
+@keyframes portalIntro {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.hero-top{
-    display:flex;
-    align-items:center;
-    gap:22px;
-    flex-wrap:wrap;
-    position:relative;
-    z-index:2;
+/* ================================================= */
+/* ================= ASYMMETRIC PORTAL GRID ======== */
+/* ================================================= */
+.portal-grid-engine {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 24px;
+    align-items: start;
 }
 
-.patient-avatar{
-    width:100px;
-    height:100px;
-    border-radius:50%;
-    background:rgba(255,255,255,0.15);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:white;
-    font-size:40px;
-    font-weight:700;
-    box-shadow:0 12px 26px rgba(0,0,0,0.15);
-    backdrop-filter:blur(5px);
+/* ================================================= */
+/* ================= PERSISTENT SIDEBAR CONSOLE ==== */
+/* ================================================= */
+.patient-profile-card {
+    background: var(--pt-surface);
+    border: 1px solid var(--pt-border);
+    border-radius: var(--radius-premium);
+    box-shadow: var(--shadow-card);
+    padding: 24px;
+    position: sticky;
+    top: 24px;
+    text-align: center;
 }
 
-.hero-details h2{
-    font-size:34px;
-    margin:0 0 12px 0;
-    color:white;
+.patient-avatar-frame {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #163b70, #2b5fad);
+    color: #ffffff;
+    font-size: 30px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px auto;
+    box-shadow: 0 8px 20px rgba(22, 59, 112, 0.2);
 }
 
-.profile-info-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:12px;
+.patient-profile-card h2 {
+    font-size: 22px;
+    font-weight: 800;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.02em;
 }
 
-.profile-info-item{
-    background:rgba(255,255,255,0.08);
-    border:1px solid rgba(255,255,255,0.15);
-    padding:12px 15px;
-    border-radius:14px;
-    color:#f0f4f8;
-    font-size:15px;
-    backdrop-filter:blur(5px);
+.patient-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--pt-vital-bg);
+    color: var(--pt-vital);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    margin-bottom: 24px;
+    border: 1px solid #bbf7d0;
 }
 
-.profile-info-item strong{
-    color:#fff;
+.demographics-metric-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
+    margin-bottom: 24px;
 }
 
-/* ================= STATS BANNER ================= */
-.stats-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:20px;
-    margin-bottom:24px;
+.demo-metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 14px;
+    background: #f8fafc;
+    border: 1px solid var(--pt-border);
+    border-radius: 12px;
 }
 
-.stats-card{
-    background:white;
-    padding:24px;
-    border-radius:26px;
-    box-shadow:0 10px 28px rgba(0,0,0,0.06);
+.demo-metric-row .dm-lbl {
+    font-size: 13px;
+    color: var(--pt-muted);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.stats-icon{
-    width:60px;
-    height:60px;
-    border-radius:18px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:white;
-    font-size:24px;
-    margin-bottom:16px;
+.demo-metric-row .dm-val {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--pt-navy);
 }
 
-.stats-blue{ background:linear-gradient(135deg,#163b70,#2a5298); }
-.stats-green{ background:linear-gradient(135deg,#00b894,#00cec9); }
-.stats-orange{ background:linear-gradient(135deg,#ff9800,#ffb74d); }
-.stats-red{ background:linear-gradient(135deg,#e53935,#ef5350); }
-
-.stats-card h4{
-    font-size:30px;
-    color:#163b70;
-    margin:0 0 8px 0;
-    font-weight:700;
+.portal-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    height: 42px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--fx-spring);
+    box-sizing: border-box;
+    border: none;
 }
 
-.stats-card p{
-    color:#666;
-    font-size:15px;
-    margin:0;
+.btn-exit-outline {
+    background: #ffffff;
+    color: var(--pt-crit);
+    border: 1px solid #fecaca;
+}
+.btn-exit-outline:hover {
+    color: #ffffff;
+    background: var(--pt-crit);
+    border-color: var(--pt-crit);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
-/* ================= DASHBOARD CORE CARDS ================= */
-.dashboard-card{
-    background:white;
-    padding:30px;
-    border-radius:30px;
-    margin-bottom:24px;
-    box-shadow:0 10px 28px rgba(0,0,0,0.06);
+/* ================================================= */
+/* ================= PORTAL COMPONENT CARDS ======== */
+/* ================================================= */
+.portal-panel-card {
+    background: var(--pt-surface);
+    border: 1px solid var(--pt-border);
+    border-radius: var(--radius-premium);
+    box-shadow: var(--shadow-card);
+    padding: 24px;
+    margin-bottom: 24px;
 }
 
-.dashboard-card h3{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    color:#163b70;
-    font-size:26px;
-    margin:0 0 24px 0;
-    flex-wrap:wrap;
+.portal-panel-card h3 {
+    font-size: 18px;
+    font-weight: 800;
+    margin: 0 0 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.02em;
 }
 
-/* ================= FORMS & SCHEDULERS ================= */
-.modern-form{
-    display:grid;
-    grid-template-columns:repeat(1,1fr);
-    gap:22px;
+.portal-panel-card h3 i {
+    color: var(--pt-brand);
 }
 
-.form-group{
-    display:flex;
-    flex-direction:column;
+/* ================================================= */
+/* ================= SEGMENTED TAB SWITCHER ======== */
+/* ================================================= */
+.portal-tabs-bar {
+    display: flex;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    gap: 4px;
 }
 
-.form-group.full{
-    grid-column:1/-1;
+.p-tab-trigger {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 11px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--pt-muted);
+    border-radius: 9px;
+    cursor: pointer;
+    transition: var(--fx-smooth);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
-.form-group label{
-    margin-bottom:10px;
-    font-size:14px;
-    font-weight:700;
-    color:#163b70;
+.p-tab-trigger.active-pane {
+    background: var(--pt-surface);
+    color: var(--pt-brand);
+    box-shadow: var(--shadow-sm);
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea{
-    width:100%;
-    padding:16px 18px;
-    border-radius:18px;
-    border:1px solid #dce5f2;
-    background:#f8fbff;
-    font-size:15px;
-    outline:none;
-    transition:0.3s ease;
+.p-tab-content {
+    display: none;
+}
+.p-tab-content.active-pane {
+    display: block;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus{
-    border-color:#2a5298;
-    box-shadow:0 0 0 4px rgba(42,82,152,0.08);
+/* ================================================= */
+/* ================= PRESCRIPTIONS LIST WORKSPACE == */
+/* ================================================= */
+.medication-matrix-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
 }
 
-/* ================= ALERT SYSTEMS ================= */
-.alert-box{
-    background:#fff5f5;
-    border-left:5px solid #e53935;
-    padding:16px 20px;
-    border-radius:16px;
-    margin-bottom:14px;
-    display:flex;
-    align-items:center;
-    gap:12px;
-    color:#c62828;
-    font-weight:600;
+.medication-line-card {
+    background: var(--pt-canvas);
+    border: 1px solid var(--pt-border);
+    border-radius: 12px;
+    padding: 16px;
 }
 
-/* ================= REPORTS LIST ================= */
-.reports-grid{
-    display:flex;
-    flex-direction:column;
-    gap:18px;
+.medication-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
 }
 
-.report-card{
-    background:#fff;
-    border:1px solid #e4edf7;
-    border-radius:22px;
-    padding:20px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:20px;
-    transition:0.3s ease;
+.medication-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--pt-navy);
 }
 
-.report-card:hover{
-    transform:translateY(-3px);
-    box-shadow:0 14px 35px rgba(0,0,0,0.08);
+.pill-active-tag {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+    text-transform: uppercase;
+    background: var(--pt-vital-bg);
+    color: var(--pt-vital);
 }
 
-.report-left{
-    display:flex;
-    align-items:center;
-    gap:18px;
-    flex:1;
+.medication-spec-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
 }
 
-.report-file-icon{
-    width:70px;
-    height:70px;
-    border-radius:20px;
-    background:linear-gradient(135deg,#eef4ff,#dbe9ff);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:30px;
+.spec-meta-block {
+    background: var(--pt-surface);
+    border: 1px solid var(--pt-border);
+    padding: 8px 12px;
+    border-radius: 8px;
 }
 
-.report-info h4{
-    color:#163b70;
-    font-size:20px;
-    margin:0 0 6px 0;
+.spec-meta-block label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--pt-muted);
+    margin-bottom: 1px;
 }
 
-.report-info p{
-    color:#6b7280;
-    font-size:14px;
-    margin:0;
+.spec-meta-block span {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--pt-navy);
 }
 
-.report-actions{
-    display:flex;
-    gap:12px;
-    flex-wrap:wrap;
+/* ================================================= */
+/* ================= CHECKUP VISIT TIMELINE ======== */
+/* ================================================= */
+.visit-timeline-chassis {
+    position: relative;
+    padding-left: 24px;
 }
 
-.report-view-btn,
-.report-download-btn{
-    text-decoration:none;
-    padding:12px 18px;
-    border-radius:14px;
-    color:white;
-    font-weight:700;
-    display:flex;
-    align-items:center;
-    gap:8px;
+.visit-timeline-chassis::before {
+    content: "";
+    position: absolute;
+    left: 5px; top: 4px; bottom: 4px;
+    width: 2px;
+    background: var(--pt-border);
 }
 
-.report-view-btn{ background:linear-gradient(135deg,#163b70,#2a5298); }
-.report-download-btn{ background:linear-gradient(135deg,#00b894,#00cec9); }
-
-/* ================= MEDICINES ================= */
-.medicine-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:20px;
+.timeline-event-node {
+    position: relative;
+    margin-bottom: 20px;
 }
 
-.medicine-card{
-    background:#fbfdff;
-    border:1px solid #e4edf7;
-    border-radius:24px;
-    padding:24px;
+.timeline-event-node::before {
+    content: "";
+    position: absolute;
+    left: -24px; top: 4px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--pt-brand);
+    border: 3px solid var(--pt-surface);
+    box-shadow: 0 0 0 3px var(--pt-brand-light);
+    z-index: 2;
 }
 
-.medicine-top{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:12px;
-    margin-bottom:20px;
-    flex-wrap:wrap;
+.timeline-stamp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f1f5f9;
+    color: var(--pt-navy);
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 10px;
 }
 
-.medicine-name{
-    font-size:22px;
-    font-weight:700;
-    color:#163b70;
+.timeline-info-plate {
+    background: var(--pt-canvas);
+    border: 1px solid var(--pt-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
 }
 
-.medicine-status{
-    padding:8px 14px;
-    border-radius:999px;
-    color:white;
-    font-size:13px;
-    font-weight:700;
-    background:linear-gradient(135deg,#00b894,#00cec9);
+.timeline-data-box label {
+    display: block;
+    font-size: 11px;
+    color: var(--pt-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 4px;
 }
 
-.medicine-details{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:14px;
+.timeline-data-box p {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.5;
 }
 
-.medicine-box{
-    background:white;
-    border:1px solid #edf2f8;
-    border-radius:16px;
-    padding:14px;
+/* ================================================= */
+/* ================= APPOINTMENT SCHEDULER ROW ====== */
+/* ================================================= */
+.form-flex-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+    width: 100%;
 }
 
-.medicine-box label{
-    display:block;
-    font-size:12px;
-    color:#6b7280;
-    margin-bottom:6px;
-    font-weight:700;
+.field-cell {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-.medicine-box span{
-    color:#163b70;
-    font-weight:600;
-    word-break:break-word;
+.field-cell label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--pt-navy);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
-/* ================= VISITS HISTORY TIMELINE ================= */
-.visit-timeline{
-    position:relative;
-    margin-left:14px;
+.field-cell input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--pt-border);
+    background: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+    transition: var(--fx-smooth);
 }
 
-.visit-timeline::before{
-    content:"";
-    position:absolute;
-    left:13px;
-    top:0;
-    width:4px;
-    height:100%;
-    border-radius:999px;
-    background:linear-gradient(to bottom,#163b70,#2a5298);
+.field-cell input:focus {
+    border-color: var(--pt-brand);
+    box-shadow: var(--shadow-glow);
 }
 
-.visit-card{
-    position:relative;
-    background:#fbfdff;
-    border:1px solid #e5edf8;
-    border-radius:24px;
-    padding:24px;
-    margin-left:40px;
-    margin-bottom:24px;
+.btn-commit {
+    background: var(--pt-brand);
+    color: #ffffff;
+}
+.btn-commit:hover {
+    background: #0f2b52;
+    transform: translateY(-1px);
 }
 
-.visit-card::before{
-    content:"";
-    position:absolute;
-    left:-35px;
-    top:30px;
-    width:18px;
-    height:18px;
-    border-radius:50%;
-    background:#163b70;
-    border:4px solid white;
-    box-shadow:0 0 0 4px #dce8f8;
+/* Medical Report Rows Architecture */
+.reports-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.visit-date{
-    display:inline-flex;
-    align-items:center;
-    gap:10px;
-    background:linear-gradient(135deg,#163b70,#2a5298);
-    color:white;
-    padding:10px 16px;
-    border-radius:999px;
-    font-size:14px;
-    font-weight:700;
-    margin-bottom:18px;
+.report-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    border: 1px solid var(--pt-border);
+    border-radius: 12px;
+    background: var(--pt-surface);
+    transition: var(--fx-spring);
+    gap: 16px;
 }
 
-.visit-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:18px;
+.report-item-row:hover {
+    transform: translateX(4px);
+    border-color: #cbd5e1;
+    box-shadow: var(--shadow-sm);
 }
 
-.visit-box{
-    background:white;
-    border:1px solid #edf2f8;
-    border-radius:18px;
-    padding:18px;
+.report-left-node {
+    display: flex;
+    align-items: center;
+    gap: 14px;
 }
 
-.visit-box label{
-    display:block;
-    margin-bottom:8px;
-    font-size:13px;
-    color:#6b7280;
-    font-weight:700;
+.report-icon-frame {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
 }
 
-.visit-box p{
-    margin:0;
-    color:#163b70;
-    line-height:1.7;
-    font-weight:600;
+.report-meta-text h4 {
+    margin: 0 0 2px 0;
+    font-size: 15px;
+    font-weight: 700;
 }
 
-.visit-full{
-    grid-column:1/-1;
+.report-meta-text p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--pt-muted);
 }
 
-/* ================= GLOBAL DECORATIVE STYLES ================= */
-.main-btn{
-    border:none;
-    outline:none;
-    padding:15px 24px;
-    border-radius:18px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-    color:white;
-    font-size:15px;
-    font-weight:700;
-    cursor:pointer;
-    transition:0.3s ease;
-    text-decoration:none;
+.action-badge-btn {
+    text-decoration: none;
+    height: 34px;
+    padding: 0 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--fx-smooth);
+}
+.b-view { background: var(--pt-brand-light); color: var(--pt-brand); }
+.b-view:hover { background: var(--pt-brand); color: #ffffff; }
+
+/* Global Fallback Blank Slates */
+.fallback-null-pane {
+    text-align: center;
+    padding: 32px 16px;
+    border: 2px dashed var(--pt-border);
+    border-radius: var(--radius-premium);
+    color: var(--pt-muted);
+}
+.fallback-null-pane i {
+    font-size: 32px;
+    color: #cbd5e1;
+    margin-bottom: 8px;
+    display: block;
+}
+.fallback-null-pane p { margin: 0; font-size: 14px; font-weight: 500; }
+
+/* ================================================= */
+/* ================= SMOOTH RESPONSIVE BREAKPOINTS = */
+/* ================================================= */
+@media (max-width: 992px) {
+    .portal-grid-engine {
+        grid-template-columns: 1fr;
+    }
+    .patient-profile-card {
+        position: relative;
+        top: 0;
+    }
 }
 
-.main-btn:hover{ transform:translateY(-2px); }
-.btn-orange{ background:linear-gradient(135deg,#ff9800,#ffb74d); }
-.logout-btn{ background:linear-gradient(135deg,#e53935,#ef5350); margin-top:15px; }
-
-.empty-report-box{
-    padding:40px 20px;
-    border-radius:24px;
-    text-align:center;
-    background:#f8fbff;
-    border:2px dashed #d8e6f5;
+@media (max-width: 768px) {
+    .medication-matrix-grid {
+        grid-template-columns: 1fr;
+    }
+    .form-flex-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .portal-action-btn {
+        width: 100%;
+    }
 }
 
-.empty-report-icon{
-    width:90px;
-    height:90px;
-    margin:auto;
-    margin-bottom:18px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#edf5ff;
-    color:#1976d2;
-    font-size:38px;
-}
-
-.empty-text{
-    text-align:center;
-    color:#666;
-    font-size:17px;
-    padding:18px;
-    margin:0;
-}
-
-/* ================= COMPREHENSIVE MOBILE RESPONSIVE MEDIA QUERIES ================= */
-@media(max-width:1100px){
-    .stats-grid{ grid-template-columns:repeat(2,1fr); }
-    .medicine-grid{ grid-template-columns:1fr; }
-}
-
-@media(max-width:768px){
-    .patient-hero{ padding:22px; }
-    .dashboard-card{ padding:20px; }
-    .profile-info-grid{ grid-template-columns:1fr; }
-    .stats-grid{ grid-template-columns:1fr; }
-    .modern-form{ grid-template-columns:1fr; }
-    .medicine-details{ grid-template-columns:1fr; }
-    .visit-grid{ grid-template-columns:1fr; }
-    .report-card{ flex-direction:column; align-items:flex-start; }
-    .report-actions{ width:100%; }
-    .report-view-btn, .report-download-btn{ width:100%; justify-content:center; }
-    .visit-card{ margin-left:28px; padding:18px; }
-    .visit-card::before{ left:-27px; }
-    .visit-timeline::before{ left:7px; }
+@media (max-width: 480px) {
+    .timeline-info-plate {
+        grid-template-columns: 1fr;
+    }
+    .report-item-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .action-badge-btn {
+        justify-content: center;
+    }
 }
 </style>
 
-<div class="patient-hero">
-    <div class="hero-top">
-        <div class="patient-avatar">
-            {{ patient.name[0] | upper if patient.name else 'P' }}
-        </div>
-        <div class="hero-details">
-            <h2>Welcome, {{ patient.name }}</h2>
-            <div class="profile-info-grid">
-                <div class="profile-info-item">
-                    <strong>Age:</strong> {{ patient.age }}
+<div class="portal-workspace-wrapper">
+    <div class="portal-grid-engine">
+        
+        <div class="patient-profile-card">
+            <div class="patient-avatar-frame">
+                {{ patient.name[0] | upper if patient.name else 'P' }}
+            </div>
+            <h2>{{ patient.name }}</h2>
+            <span class="patient-status-badge">
+                <i class="fa-solid fa-circle-check"></i> Connected Profile
+            </span>
+            
+            <div class="demographics-metric-list">
+                <div class="demo-metric-row">
+                    <span class="dm-lbl"><i class="fa-solid fa-bed-pulse"></i> Condition</span>
+                    <span class="demo-disease dm-val" style="color: var(--pt-crit);">{{ patient.disease if patient.disease else 'General Checkup' }}</span>
                 </div>
-                <div class="profile-info-item">
-                    <strong>Phone:</strong> {{ patient.phone }}
+                <div class="demo-metric-row">
+                    <span class="dm-lbl"><i class="fa-solid fa-cake-candles"></i> Age</span>
+                    <span class="demo-age dm-val">{{ patient.age }} Years</span>
                 </div>
-                <div class="profile-info-item">
-                    <strong>Gender:</strong> {{ patient.gender if patient.gender else 'Not Added' }}
+                <div class="demo-metric-row">
+                    <span class="dm-lbl"><i class="fa-solid fa-venus-mars"></i> Gender</span>
+                    <span class="demo-gender dm-val">{{ patient.gender if patient.gender else 'N/A' }}</span>
                 </div>
-                <div class="profile-info-item">
-                    <strong>Blood Group:</strong> {{ patient.blood_group if patient.blood_group else 'Not Added' }}
+                <div class="demo-metric-row">
+                    <span class="dm-lbl"><i class="fa-solid fa-droplet" style="color: #ef4444;"></i> Blood Group</span>
+                    <span class="demo-blood dm-val" style="color: #ef4444;">{{ patient.blood_group if patient.blood_group else 'N/A' }}</span>
                 </div>
-                <div class="profile-info-item">
-                    <strong>Condition:</strong> {{ patient.disease if patient.disease else 'Not Added' }}
+                <div class="demo-metric-row">
+                    <span class="dm-lbl"><i class="fa-solid fa-phone"></i> Contact</span>
+                    <span class="dm-val">{{ patient.phone }}</span>
                 </div>
-                <div class="profile-info-item">
-                    <strong>Address:</strong> {{ patient.address if patient.address else 'Not Added' }}
+                <div class="demo-metric-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                    <span class="dm-lbl"><i class="fa-solid fa-map-pin"></i> Registered Address</span>
+                    <span class="dm-val" style="font-size: 12px; font-weight: 500; color: var(--pt-muted); line-height: 1.4;">{{ patient.address if patient.address else 'No address record configured.' }}</span>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
-<div class="stats-grid">
-    <div class="stats-card">
-        <div class="stats-icon stats-blue">
-            <i class="fa-solid fa-file-medical"></i>
+            <a href="/logout" class="portal-action-btn btn-exit-outline">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout Portal Session
+            </a>
         </div>
-        <h4>{{ reports|length if reports else 0 }}</h4>
-        <p>Medical Reports</p>
-    </div>
-    <div class="stats-card">
-        <div class="stats-icon stats-green">
-            <i class="fa-solid fa-pills"></i>
-        </div>
-        <h4>{{ medicines|length if medicines else 0 }}</h4>
-        <p>Active Medicines</p>
-    </div>
-    <div class="stats-card">
-        <div class="stats-icon stats-orange">
-            <i class="fa-solid fa-notes-medical"></i>
-        </div>
-        <h4>{{ visits|length if visits else 0 }}</h4>
-        <p>Total Visits</p>
-    </div>
-    <div class="stats-card">
-        <div class="stats-icon stats-red">
-            <i class="fa-solid fa-heart-pulse"></i>
-        </div>
-        <h4>Active</h4>
-        <p>Patient Tracking</p>
-    </div>
-</div>
 
-<div class="dashboard-card">
-    <h3>
-        <i class="fa-solid fa-bell"></i> Live Medicine Reminders
-    </h3>
-    {% if medicine_alerts %}
-        {% for alert in medicine_alerts %}
-        <div class="alert-box">
-            <i class="fa-solid fa-pills"></i>
-            {{ alert }}
-        </div>
-        {% endfor %}
-    {% else %}
-    <div class="empty-report-box" style="padding:20px; border-style:solid; background:#e8f5e9; border-color:#a5d6a7; color:#2e7d32;">
-        <p class="empty-text" style="color:#2e7d32;"><i class="fa-solid fa-circle-check"></i> All prescription cycles are running smoothly up to date.</p>
-    </div>
-    {% endif %}
-</div>
+        <div class="portal-stream-content">
+            
+            <div class="portal-panel-card">
+                <h3><i class="fa-solid fa-heart-pulse"></i> Your Medical Chart Overview</h3>
+                
+                <div class="portal-tabs-bar">
+                    <button class="p-tab-trigger active-pane" onclick="togglePortalPane(event, 'pane-meds')">
+                        <i class="fa-solid fa-capsules"></i> Active Pharmacotherapy
+                    </button>
+                    <button class="p-tab-trigger" onclick="togglePortalPane(event, 'pane-visits')">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Historical Visits
+                    </button>
+                </div>
 
-<div class="dashboard-card">
-    <h3>
-        <i class="fa-solid fa-clock-history"></i> Your Appointment Requests
-    </h3>
-    
-    {% if appointments %}
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; min-width: 450px;">
-            <thead>
-                <tr style="background-color: #f4f7fc; color: #163b70; border-bottom: 2px solid #edf2f7;">
-                    <th style="padding: 14px;">Requested Date</th>
-                    <th style="padding: 14px;">Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for app in appointments %}
-                <tr style="border-bottom: 1px solid #edf2f7;">
-                    <td style="padding: 14px; font-weight: 600; color: #333;">{{ app['requested_date'] }}</td>
-                    <td style="padding: 14px;">
-                        {% if app['status'] == 'pending' %}
-                            <span style="background: #fff5d8; color: #9a6700; padding: 6px 14px; border-radius: 30px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
-                                <i class="fa-solid fa-clock"></i> Pending
-                            </span>
-                        {% elif app['status'] == 'approved' %}
-                            <span style="background: #dcfce7; color: #15803d; padding: 6px 14px; border-radius: 30px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
-                                <i class="fa-solid fa-circle-check"></i> Approved
-                            </span>
-                        {% elif app['status'] == 'rejected' %}
-                            <span style="background: #ffe2e2; color: #b42318; padding: 6px 14px; border-radius: 30px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
-                                <i class="fa-solid fa-circle-xmark"></i> Rejected
-                            </span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <div style="padding: 10px 0; color: #6c757d; font-size: 15px;">
-        <i class="fa-solid fa-calendar-minus" style="margin-right: 5px;"></i> You haven't requested any appointments yet.
-    </div>
-    {% endif %}
-</div>
-
-<div class="dashboard-card">
-    <h3>
-        <i class="fa-solid fa-calendar-plus"></i> Book Appointment Checkup
-    </h3>
-    <form method="POST" action="/request_appointment" class="modern-form">
-        <div class="form-group">
-            <label>Requested Appointment Date</label>
-            <input type="text" name="requested_date" class="modern-calendar" placeholder="Select Preferred Date" style="background:#f8fbff !important;" required>
-        </div>
-        <div class="form-group full" style="margin-top: 10px;">
-            <button type="submit" class="main-btn btn-orange">
-                <i class="fa-solid fa-paper-plane"></i> Submit Appointment Request
-            </button>
-        </div>
-    </form>
-</div>
-
-<div class="dashboard-card">
-    <h3>
-        <i class="fa-solid fa-file-invoice-raster"></i> Your Medical Files & Diagnosis Reports
-    </h3>
-    {% if reports and reports|length > 0 %}
-    <div class="reports-grid">
-        {% for report in reports %}
-        {% set file_name = report.file_name if report.file_name else '' %}
-        {% set file_lower = file_name|lower %}
-        <div class="report-card">
-            <div class="report-left">
-                <div class="report-file-icon">
-                    {% if '.pdf' in file_lower %}
-                        <i class="fa-solid fa-file-pdf" style="color:#e53935;"></i>
-                    {% elif '.png' in file_lower or '.jpg' in file_lower or '.jpeg' in file_lower %}
-                        <i class="fa-solid fa-file-image" style="color:#00b894;"></i>
+                <div id="pane-meds" class="p-tab-content active-pane">
+                    {% if medicines %}
+                    <div class="medication-matrix-grid">
+                        {% for med in medicines %}
+                        <div class="medication-line-card">
+                            <div class="medication-header-row">
+                                <span class="medication-title">{{ med.medicine_name }}</span>
+                                <span class="pill-active-tag">Active</span>
+                            </div>
+                            <div class="medication-spec-grid">
+                                <div class="spec-meta-block"><label>Dosage</label><span>{{ med.dosage if med.dosage else 'N/A' }}</span></div>
+                                <div class="spec-meta-block"><label>Times/Day</label><span>{{ med.times_per_day if med.times_per_day else 'N/A' }}</span></div>
+                                <div class="spec-meta-block"><label>Total Days</label><span>{{ med.total_days if med.total_days else 'N/A' }}</span></div>
+                                <div class="spec-meta-block"><label>Quantity</label><span>{{ med.quantity if med.quantity else 'N/A' }}</span></div>
+                                <div class="spec-meta-block form-full-row" style="grid-column: 1 / -1; margin-top: 4px;"><label>Start Date</label><span>{{ med.start_date }}</span></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
                     {% else %}
-                        <i class="fa-solid fa-file"></i>
+                    <div class="fallback-null-pane">
+                        <i class="fa-solid fa-capsules"></i>
+                        <p>No active prescription protocols tracked to this portal.</p>
+                    </div>
                     {% endif %}
                 </div>
-                <div class="report-info">
-                    <h4>{{ report.report_name }}</h4>
-                    <p>{{ file_name }}</p>
+
+                <div id="pane-visits" class="p-tab-content">
+                    {% if visits %}
+                    <div class="visit-timeline-chassis">
+                        {% for visit in visits %}
+                        <div class="timeline-event-node">
+                            <div class="timeline-stamp-badge">
+                                <i class="fa-solid fa-calendar-day"></i> {{ visit.visit_date if visit.visit_date else visit[2] }}
+                            </div>
+                            <div class="timeline-info-plate">
+                                <div class="timeline-data-box">
+                                    <label>Diagnosis Conclusion</label>
+                                    <p style="font-weight: 700; color: var(--pt-navy);">{{ visit.diagnosis if visit.diagnosis else visit[3] }}</p>
+                                </div>
+                                <div class="timeline-data-box">
+                                    <label>Directives & Prescriptions</label>
+                                    <p style="color: var(--pt-muted);">{{ visit.prescription if visit.prescription else visit[4] }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="fallback-null-pane">
+                        <i class="fa-solid fa-notes-medical"></i>
+                        <p>No past diagnostic evaluation encounters tracked to this profile timeline.</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
-            <div class="report-actions">
-                <a href="{{ url_for('uploaded_file', filename=file_name) }}" target="_blank" class="report-view-btn">
-                    <i class="fa-solid fa-eye"></i> View File
-                </a>
-                <a href="{{ url_for('uploaded_file', filename=file_name) }}" download class="report-download-btn">
-                    <i class="fa-solid fa-download"></i> Download
-                </a>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <div class="empty-report-box">
-        <div class="empty-report-icon">
-            <i class="fa-solid fa-file-circle-xmark"></i>
-        </div>
-        <h4>No Reports Linked</h4>
-        <p class="empty-text">Your medical records or clinical lab attachments haven't been added yet.</p>
-    </div>
-    {% endif %}
-</div>
 
-<div class="dashboard-card">
-    <h3>
-        <i class="fa-solid fa-pills"></i> Current Prescription Medications
-    </h3>
-    {% if medicines %}
-    <div class="medicine-grid">
-        {% for med in medicines %}
-        <div class="medicine-card">
-            <div class="medicine-top">
-                <span class="medicine-name">{{ med.medicine_name }}</span>
-                <span class="medicine-status">Active</span>
+            <div class="portal-panel-card">
+                <h3><i class="fa-solid fa-calendar-plus"></i> Request Consultation Appointment</h3>
+                <form method="POST" action="{{ url_for('request_appointment') }}">
+                    <div class="form-flex-row">
+                        <div class="field-cell">
+                            <label>Select Preferred Date & Time</label>
+                            <input type="text" name="requested_date" class="modern-datetime-picker" placeholder="Choose your preferred appointment schedule..." required>
+                        </div>
+                        <button type="submit" class="portal-action-btn btn-commit" style="height: 46px; width: auto; padding: 0 28px;">
+                            <i class="fa-solid fa-paper-plane"></i> Send Request
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="medicine-details">
-                <div class="medicine-box"><label>Dosage</label><span>{{ med.dosage if med.dosage else 'N/A' }}</span></div>
-                <div class="medicine-box"><label>Times/Day</label><span>{{ med.times_per_day if med.times_per_day else 'N/A' }}</span></div>
-                <div class="medicine-box"><label>Total Days</label><span>{{ med.total_days if med.total_days else 'N/A' }}</span></div>
-                <div class="medicine-box"><label>Quantity Ordered</label><span>{{ med.quantity if med.quantity else 'N/A' }}</span></div>
-                <div class="medicine-box visit-full"><label>Treatment Start Date</label><span>{{ med.start_date }}</span></div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <p class="empty-text">No medication courses currently active.</p>
-    {% endif %}
-</div>
 
-<div class="dashboard-card">
-    <h3>
-        <i class="fa-solid fa-clock-history"></i> Your Visit Timeline History
-    </h3>
-    {% if visits %}
-    <div class="visit-timeline">
-        {% for visit in visits %}
-        <div class="visit-card">
-            <div class="visit-date">
-                <i class="fa-solid fa-calendar-days"></i> {{ visit.visit_date if visit.visit_date else visit[2] }}
-            </div>
-            <div class="visit-grid">
-                <div class="visit-box">
-                    <label>Diagnosis Summary</label>
-                    <p>{{ visit.diagnosis if visit.diagnosis else visit[3] }}</p>
+            <div class="portal-panel-card">
+                <h3><i class="fa-solid fa-file-invoice"></i> Your Verified Lab Reports Archive</h3>
+                {% if reports and reports|length > 0 %}
+                <div class="reports-list-container">
+                    {% for report in reports %}
+                    {% set file_name = report.file_name if report.file_name else '' %}
+                    {% set file_lower = file_name|lower %}
+                    <div class="report-item-row">
+                        <div class="report-left-node">
+                            <div class="report-icon-frame">
+                                {% if '.pdf' in file_lower %}
+                                    <i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i>
+                                {% elif '.png' in file_lower or '.jpg' in file_lower or '.jpeg' in file_lower %}
+                                    <i class="fa-solid fa-file-image" style="color: #10b981;"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-file-lines" style="color: var(--pt-brand);"></i>
+                                {% endif %}
+                            </div>
+                            <div class="report-meta-text">
+                                <h4>{{ report.report_name }}</h4>
+                                <p>{{ file_name }}</p>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('uploaded_file', filename=file_name) }}" target="_blank" class="action-badge-btn b-view">
+                            <i class="fa-solid fa-download"></i> View & Download
+                        </a>
+                    </div>
+                    {% endfor %}
                 </div>
-                <div class="visit-box">
-                    <label>Doctor's Prescriptions & Instructions</label>
-                    <p>{{ visit.prescription if visit.prescription else visit[4] }}</p>
+                {% else %}
+                <div class="fallback-null-pane">
+                    <i class="fa-solid fa-folder-tree"></i>
+                    <p>No external clinical validation reports have been uploaded yet by your doctor.</p>
                 </div>
+                {% endif %}
             </div>
-        </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <p class="empty-text">No past visit histories tracked to this portal profile.</p>
-    {% endif %}
-</div>
 
-<a href="/logout" class="main-btn logout-btn">
-    <i class="fa-solid fa-right-from-bracket"></i> Logout Portal Session
-</a>
+        </div>
+    </div>
+</div>
 
 <script>
-// Correct initialization setup block execution link
-flatpickr(".modern-calendar", {
-    dateFormat: "Y-m-d",
-    allowInput: false,
-    disableMobile: true,
-    monthSelectorType: "static"
+document.addEventListener("DOMContentLoaded", function() {
+    // Elegant Flatpickr Initialization Setup 
+    flatpickr(".modern-datetime-picker", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        minDate: "today",
+        time_24hr: false
+    });
 });
+
+function togglePortalPane(event, paneId) {
+    const contextCard = event.currentTarget.closest('.portal-panel-card');
+    
+    // Wipe active classes on siblings
+    contextCard.querySelectorAll('.p-tab-trigger').forEach(btn => btn.classList.remove('active-pane'));
+    contextCard.querySelectorAll('.p-tab-content').forEach(pane => pane.classList.remove('active-pane'));
+    
+    // Active states assignment targets
+    event.currentTarget.classList.add('active-pane');
+    contextCard.querySelector('#' + paneId).classList.add('active-pane');
+}
 </script>
 
 {% endblock %}

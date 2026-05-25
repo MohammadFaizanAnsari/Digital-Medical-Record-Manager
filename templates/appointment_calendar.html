@@ -2,70 +2,780 @@
 
 {% block content %}
 
-<!-- ================================================= -->
-<!-- ================= CALENDAR CARD ================= -->
-<!-- ================================================= -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 
-<div class="calendar-card">
+<style>
 
-    <!-- Sticky Header -->
-    <div class="calendar-sticky-header">
+/* ==========================================================================
+   PREMIUM MEDICAL CALENDAR DASHBOARD
+   ========================================================================== */
 
-        <button id="prevBtn" class="nav-btn">
-            ◀
-        </button>
+:root{
 
-        <h2 id="calendarTitle"></h2>
+    --primary:#2563eb;
+    --primary-dark:#1d4ed8;
+    --primary-light:#dbeafe;
 
-        <button id="nextBtn" class="nav-btn">
-            ▶
-        </button>
+    --success:#16a34a;
+    --success-light:#dcfce7;
 
-    </div>
+    --warning:#d97706;
+    --warning-light:#fef3c7;
 
-    <!-- Calendar -->
-    <div id="calendar"></div>
+    --danger:#dc2626;
+    --danger-light:#fee2e2;
 
-</div>
+    --surface:#ffffff;
+    --surface-soft:#f8fafc;
 
-<!-- ================================================= -->
-<!-- ================= BUTTON ======================== -->
-<!-- ================================================= -->
+    --background:#f1f5f9;
 
-<div class="calendar-action">
+    --border:#e2e8f0;
 
-    <a href="/appointments" class="btn manage-btn">
+    --text:#0f172a;
+    --muted:#64748b;
 
-        🗂 Manage Appointments
+    --shadow:
+    0 10px 30px rgba(15,23,42,0.08);
 
-    </a>
+    --radius-xl:30px;
+    --radius-lg:22px;
+    --radius-md:16px;
+}
 
-</div>
+/* ==========================================================================
+   BODY
+   ========================================================================== */
 
-<!-- ================================================= -->
-<!-- ================= APPOINTMENTS ================= -->
-<!-- ================================================= -->
+body{
+    background:
+    radial-gradient(circle at top left, rgba(37,99,235,0.07), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(14,165,233,0.07), transparent 25%),
+    var(--background);
+}
 
-<div class="appointment-card">
+/* ==========================================================================
+   LAYOUT
+   ========================================================================== */
 
-    <h3>
+.calendar-dashboard{
+    padding:18px 0 25px;
+}
 
-        📋 Appointments on
+.dashboard-grid{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 420px;
+    gap:28px;
+    align-items:start;
+}
 
-        <span id="selectedDate">
+@media(max-width:1200px){
+    .dashboard-grid{
+        grid-template-columns:1fr;
+    }
+}
 
-            Select a date
+/* ==========================================================================
+   CARDS
+   ========================================================================== */
 
-        </span>
+.glass-card{
 
-    </h3>
+    background:rgba(255,255,255,0.92);
 
-    <!-- Mobile Friendly Table -->
-    <div id="appointmentTable">
+    border:1px solid rgba(255,255,255,0.6);
 
-        <div class="empty-box">
+    border-radius:var(--radius-xl);
 
-            Select a date to see appointments.
+    box-shadow:var(--shadow);
+
+    overflow:hidden;
+
+    position:relative;
+
+    backdrop-filter:blur(12px);
+}
+
+.glass-card::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:5px;
+
+    background:
+    linear-gradient(
+        90deg,
+        #2563eb,
+        #3b82f6,
+        #0ea5e9
+    );
+}
+
+/* ==========================================================================
+   HEADERS
+   ========================================================================== */
+
+.dashboard-header{
+    padding:28px 30px 20px;
+    border-bottom:1px solid #edf2f7;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.dashboard-header h2{
+    margin:0;
+    font-size:1.7rem;
+    font-weight:800;
+    color:var(--text);
+    letter-spacing:-0.5px;
+}
+
+.dashboard-header p{
+    margin:8px 0 0;
+    color:var(--muted);
+    font-size:0.92rem;
+}
+
+.live-status{
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+
+    padding:12px 16px;
+
+    border-radius:16px;
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.live-dot{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#22c55e;
+
+    position:relative;
+}
+
+.live-dot::after{
+    content:"";
+    position:absolute;
+    inset:-4px;
+    border-radius:50%;
+    border:2px solid rgba(34,197,94,0.25);
+
+    animation:pulse 2s infinite;
+}
+
+@keyframes pulse{
+    0%{transform:scale(0.7);opacity:1;}
+    100%{transform:scale(1.7);opacity:0;}
+}
+
+.live-status span{
+    font-size:0.85rem;
+    font-weight:700;
+    color:#334155;
+}
+
+/* ==========================================================================
+   CALENDAR
+   ========================================================================== */
+
+.calendar-body{
+    padding:18px;
+}
+
+/* Toolbar */
+
+.fc .fc-toolbar{
+    margin-bottom:18px !important;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.fc-toolbar-title{
+    font-size:1.45rem !important;
+    font-weight:800 !important;
+    color:var(--text);
+}
+
+/* Buttons */
+
+.fc .fc-button{
+
+    border:none !important;
+
+    background:white !important;
+
+    color:#334155 !important;
+
+    border-radius:14px !important;
+
+    padding:10px 15px !important;
+
+    font-size:0.82rem !important;
+    font-weight:700 !important;
+
+    box-shadow:
+    0 4px 12px rgba(15,23,42,0.06);
+
+    transition:0.25s ease;
+}
+
+.fc .fc-button:hover{
+
+    background:
+    linear-gradient(
+        135deg,
+        #2563eb,
+        #3b82f6
+    ) !important;
+
+    color:white !important;
+
+    transform:translateY(-1px);
+}
+
+.fc .fc-button-active{
+
+    background:
+    linear-gradient(
+        135deg,
+        #2563eb,
+        #3b82f6
+    ) !important;
+
+    color:white !important;
+}
+
+/* Calendar Grid */
+
+.fc-theme-standard td,
+.fc-theme-standard th{
+    border-color:#eef2f7 !important;
+}
+
+.fc-theme-standard .fc-scrollgrid{
+    border:none !important;
+}
+
+/* Days */
+
+.fc-col-header-cell{
+    background:#f8fafc;
+    padding:12px 0 !important;
+}
+
+.fc-col-header-cell-cushion{
+    text-decoration:none !important;
+    color:#475569 !important;
+
+    font-size:0.78rem;
+    font-weight:800;
+    letter-spacing:0.4px;
+}
+
+/* ==========================================================================
+   DATE SLOT SIZE FIX
+   Making calendar more horizontal rectangular
+   ========================================================================== */
+
+.fc-daygrid-day-frame{
+    min-height:78px !important;
+    height:78px !important;
+}
+
+.fc .fc-daygrid-day-top{
+    flex-direction:row;
+    justify-content:flex-end;
+}
+
+.fc-daygrid-day-number{
+    text-decoration:none !important;
+
+    color:#1e293b !important;
+
+    font-size:0.82rem;
+    font-weight:700;
+
+    padding:8px !important;
+}
+
+.fc-daygrid-day:hover{
+    background:#f8fbff;
+}
+
+.fc .fc-day-today{
+    background:
+    linear-gradient(
+        180deg,
+        rgba(37,99,235,0.08),
+        rgba(37,99,235,0.02)
+    ) !important;
+}
+
+/* ==========================================================================
+   APPOINTMENT COUNT COLORS
+   ========================================================================== */
+
+/* LOW APPOINTMENTS 1-5 */
+
+.low-load{
+    background:
+    linear-gradient(
+        135deg,
+        #16a34a,
+        #22c55e
+    ) !important;
+
+    color:white !important;
+
+    border:none !important;
+
+    box-shadow:
+    0 8px 18px rgba(34,197,94,0.25);
+}
+
+/* MEDIUM APPOINTMENTS 5-8 */
+
+.medium-load{
+    background:
+    linear-gradient(
+        135deg,
+        #d97706,
+        #f59e0b
+    ) !important;
+
+    color:white !important;
+
+    border:none !important;
+
+    box-shadow:
+    0 8px 18px rgba(245,158,11,0.25);
+}
+
+/* HIGH APPOINTMENTS ABOVE 8 */
+
+.high-load{
+    background:
+    linear-gradient(
+        135deg,
+        #dc2626,
+        #ef4444
+    ) !important;
+
+    color:white !important;
+
+    border:none !important;
+
+    box-shadow:
+    0 8px 18px rgba(239,68,68,0.25);
+}
+
+.fc-event{
+
+    border-radius:10px !important;
+
+    padding:3px 8px !important;
+
+    font-size:0.68rem !important;
+    font-weight:800 !important;
+
+    transition:0.2s ease;
+}
+
+.fc-event:hover{
+    transform:translateY(-1px);
+}
+
+/* ==========================================================================
+   SIDEBAR
+   ========================================================================== */
+
+.sidebar-header{
+    padding:28px 28px 20px;
+    border-bottom:1px solid #edf2f7;
+}
+
+.sidebar-header h3{
+    margin:0;
+    font-size:1.4rem;
+    font-weight:800;
+    color:var(--text);
+}
+
+.sidebar-header p{
+    margin:10px 0 0;
+    color:var(--muted);
+    font-size:0.9rem;
+}
+
+/* ==========================================================================
+   APPOINTMENT LIST
+   ========================================================================== */
+
+.appointment-list{
+    padding:20px;
+    max-height:720px;
+    overflow-y:auto;
+}
+
+.appointment-list::-webkit-scrollbar{
+    width:5px;
+}
+
+.appointment-list::-webkit-scrollbar-thumb{
+    background:#cbd5e1;
+    border-radius:20px;
+}
+
+/* ==========================================================================
+   APPOINTMENT CARD
+   ========================================================================== */
+
+.appointment-card{
+
+    background:
+    linear-gradient(
+        180deg,
+        #ffffff,
+        #f8fafc
+    );
+
+    border:1px solid #edf2f7;
+
+    border-radius:24px;
+
+    padding:20px;
+
+    margin-bottom:18px;
+
+    transition:0.3s ease;
+
+    position:relative;
+
+    overflow:hidden;
+}
+
+.appointment-card:hover{
+
+    transform:translateY(-3px);
+
+    border-color:#bfdbfe;
+
+    box-shadow:
+    0 16px 28px rgba(15,23,42,0.08);
+}
+
+.appointment-card::before{
+    content:"";
+    position:absolute;
+    top:0;
+    right:0;
+    width:5px;
+    height:100%;
+
+    background:
+    linear-gradient(
+        180deg,
+        #2563eb,
+        #0ea5e9
+    );
+}
+
+.patient-top{
+    display:flex;
+    gap:16px;
+    align-items:flex-start;
+}
+
+.patient-avatar{
+
+    width:56px;
+    height:56px;
+
+    border-radius:18px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #2563eb,
+        #3b82f6
+    );
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:white;
+
+    font-size:1.15rem;
+    font-weight:800;
+
+    flex-shrink:0;
+
+    box-shadow:
+    0 10px 20px rgba(37,99,235,0.22);
+}
+
+.patient-info{
+    flex:1;
+}
+
+.patient-info h4{
+    margin:0;
+    font-size:1rem;
+    font-weight:800;
+    color:#0f172a;
+}
+
+.patient-phone{
+    margin-top:9px;
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    color:#64748b;
+
+    font-size:0.86rem;
+}
+
+.patient-phone i{
+    color:#2563eb;
+}
+
+.patient-footer{
+    margin-top:20px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+
+    flex-wrap:wrap;
+}
+
+/* ==========================================================================
+   STATUS
+   ========================================================================== */
+
+.status-badge{
+
+    padding:8px 15px;
+
+    border-radius:999px;
+
+    font-size:0.7rem;
+    font-weight:800;
+
+    text-transform:uppercase;
+    letter-spacing:0.4px;
+}
+
+.status-badge.approved{
+    background:#ecfdf3;
+    color:#15803d;
+    border:1px solid #bbf7d0;
+}
+
+.status-badge.pending{
+    background:#fff7ed;
+    color:#c2410c;
+    border:1px solid #fed7aa;
+}
+
+.status-badge.rejected{
+    background:#fef2f2;
+    color:#b91c1c;
+    border:1px solid #fecaca;
+}
+
+/* ==========================================================================
+   BUTTON
+   ========================================================================== */
+
+.profile-btn{
+
+    background:
+    linear-gradient(
+        135deg,
+        #2563eb,
+        #3b82f6
+    );
+
+    color:white;
+    text-decoration:none;
+
+    padding:11px 16px;
+
+    border-radius:15px;
+
+    font-size:0.8rem;
+    font-weight:700;
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    transition:0.25s ease;
+
+    box-shadow:
+    0 10px 20px rgba(37,99,235,0.2);
+}
+
+.profile-btn:hover{
+
+    color:white;
+
+    transform:translateY(-2px);
+
+    box-shadow:
+    0 14px 24px rgba(37,99,235,0.28);
+}
+
+/* ==========================================================================
+   EMPTY STATE
+   ========================================================================== */
+
+.empty-state{
+    text-align:center;
+    padding:70px 20px;
+}
+
+.empty-state i{
+    font-size:3.2rem;
+    color:#cbd5e1;
+    margin-bottom:16px;
+}
+
+.empty-state h4{
+    margin:0 0 8px;
+    font-size:1.05rem;
+    font-weight:800;
+    color:#334155;
+}
+
+.empty-state p{
+    margin:0;
+    color:#64748b;
+    font-size:0.9rem;
+}
+
+/* ==========================================================================
+   MOBILE
+   ========================================================================== */
+
+@media(max-width:768px){
+
+    .dashboard-header{
+        padding:22px 20px 18px;
+    }
+
+    .calendar-body{
+        padding:12px;
+    }
+
+    .sidebar-header{
+        padding:24px 22px 18px;
+    }
+
+    .appointment-list{
+        padding:16px;
+    }
+
+    .fc-toolbar{
+        flex-direction:column;
+        align-items:center !important;
+    }
+
+    .fc-toolbar-title{
+        font-size:1.1rem !important;
+    }
+
+    .fc .fc-button{
+        padding:8px 11px !important;
+        font-size:0.76rem !important;
+    }
+
+    .fc-daygrid-day-frame{
+        min-height:62px !important;
+        height:62px !important;
+    }
+
+    .fc-daygrid-day-number{
+        font-size:0.72rem !important;
+        padding:5px !important;
+    }
+
+    .patient-footer{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .profile-btn{
+        width:100%;
+        justify-content:center;
+    }
+}
+
+</style>
+
+<div class="container calendar-dashboard">
+
+    <div class="dashboard-grid">
+
+        <!-- CALENDAR -->
+        <div class="glass-card">
+
+            <div class="dashboard-header">
+
+                <div>
+                    <h2>Appointment Calendar</h2>
+                    <p>Smart patient scheduling and appointment management</p>
+                </div>
+
+                <div class="live-status">
+                    <div class="live-dot"></div>
+                    <span>Live System</span>
+                </div>
+
+            </div>
+
+            <div class="calendar-body">
+                <div id="calendar"></div>
+            </div>
+
+        </div>
+
+        <!-- APPOINTMENTS -->
+        <div class="glass-card">
+
+            <div class="sidebar-header">
+                <h3>Appointments</h3>
+                <p id="selectedDateText">
+                    Select a date from calendar
+                </p>
+            </div>
+
+            <div class="appointment-list" id="appointmentTable">
+
+                <div class="empty-state">
+                    <i class="fa-regular fa-calendar-days"></i>
+                    <h4>No Date Selected</h4>
+                    <p>Select a calendar date to view appointments</p>
+                </div>
+
+            </div>
 
         </div>
 
@@ -73,34 +783,13 @@
 
 </div>
 
-<!-- ================================================= -->
-<!-- ================= FULLCALENDAR ================= -->
-<!-- ================================================= -->
-
-<link
-href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css"
-rel="stylesheet"
-/>
-
-<script
-src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js">
-</script>
-
-<!-- ================================================= -->
-<!-- ================= SCRIPT ======================== -->
-<!-- ================================================= -->
-
 <script>
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
 
-    let isMobile = window.innerWidth <= 768;
+    var calendarEl = document.getElementById('calendar');
 
-    let calendarEl = document.getElementById('calendar');
-
-    let titleEl = document.getElementById('calendarTitle');
-
-    let calendar = new FullCalendar.Calendar(calendarEl, {
+    var calendar = new FullCalendar.Calendar(calendarEl, {
 
         initialView: 'dayGridMonth',
 
@@ -108,149 +797,127 @@ document.addEventListener('DOMContentLoaded', function() {
 
         fixedWeekCount: false,
 
-        headerToolbar: false,
+        dayMaxEvents: 2,
 
-        dayMaxEvents: 1,
-
-        events: "/appointment_calendar_data",
-
-        datesSet: function(info){
-
-            titleEl.innerText = info.view.title;
-
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: ''
         },
 
-        dateClick: function(info){
+        /* ==========================================================
+           COLOR INDICATION BASED ON APPOINTMENT COUNT
+           ========================================================== */
 
-            let selectedDate = info.dateStr;
+        events: function(fetchInfo, successCallback, failureCallback){
 
-            document.getElementById("selectedDate")
-            .innerText = selectedDate;
+            fetch('/calendar_data')
 
-            fetch("/appointments_by_date?date=" + selectedDate)
+            .then(response => response.json())
+
+            .then(events => {
+
+                const updatedEvents = events.map(event => {
+
+                    let count = 0;
+
+                    if(event.title){
+
+                        const match = event.title.match(/\d+/);
+
+                        if(match){
+                            count = parseInt(match[0]);
+                        }
+                    }
+
+                    if(count >= 1 && count <= 5){
+
+                        event.className = 'low-load';
+
+                    }else if(count > 5 && count <= 8){
+
+                        event.className = 'medium-load';
+
+                    }else if(count > 8){
+
+                        event.className = 'high-load';
+                    }
+
+                    return event;
+                });
+
+                successCallback(updatedEvents);
+
+            })
+
+            .catch(error => failureCallback(error));
+        },
+
+        dateClick: function(info) {
+
+            document.getElementById("selectedDateText").innerHTML =
+                `<i class="fa-regular fa-calendar"></i> ${info.dateStr}`;
+
+            fetch("/appointments_by_date?date=" + info.dateStr)
 
             .then(res => res.json())
 
             .then(data => {
 
-                let container =
-                document.getElementById("appointmentTable");
+                let container = document.getElementById("appointmentTable");
 
-                container.innerHTML = "";
-
-                // =============================================
-                // NO APPOINTMENTS
-                // =============================================
-
-                if(
-                    !data.appointments ||
-                    data.appointments.length === 0
-                ){
+                if (!data.appointments || data.appointments.length === 0) {
 
                     container.innerHTML = `
-
-                        <div class="empty-box">
-
-                            📭 No Appointments
-
+                        <div class="empty-state">
+                            <i class="fa-regular fa-calendar-xmark"></i>
+                            <h4>No Appointments</h4>
+                            <p>No appointments scheduled for this date</p>
                         </div>
-
                     `;
 
                     return;
-
                 }
 
-                // =============================================
-                // SHOW APPOINTMENTS
-                // =============================================
+                container.innerHTML = data.appointments.map(a => `
 
-                data.appointments.forEach(a => {
+                    <div class="appointment-card">
 
-                    let statusClass = "";
+                        <div class="patient-top">
 
-                    if(a.status.toLowerCase() === "approved"){
-
-                        statusClass = "approved";
-
-                    }else if(
-                        a.status.toLowerCase() === "pending"
-                    ){
-
-                        statusClass = "pending";
-
-                    }else{
-
-                        statusClass = "rejected";
-
-                    }
-
-                    container.innerHTML += `
-
-                        <div class="appointment-item">
-
-                            <div class="appoint-row">
-
-                                <span class="appoint-label">
-
-                                    👤 Patient
-
-                                </span>
-
-                                <span class="appoint-value">
-
-                                    ${a.name}
-
-                                </span>
-
+                            <div class="patient-avatar">
+                                ${a.name.charAt(0).toUpperCase()}
                             </div>
 
-                            <div class="appoint-row">
+                            <div class="patient-info">
 
-                                <span class="appoint-label">
+                                <h4>${a.name}</h4>
 
-                                    📞 Phone
-
-                                </span>
-
-                                <span class="appoint-value">
-
-                                    ${a.phone}
-
-                                </span>
-
-                            </div>
-
-                            <div class="appoint-row">
-
-                                <span class="appoint-label">
-
-                                    📌 Status
-
-                                </span>
-
-                                <span class="status-badge ${statusClass}">
-
-                                    ${a.status}
-
-                                </span>
+                                <div class="patient-phone">
+                                    <i class="fa-solid fa-phone"></i>
+                                    <span>${a.phone}</span>
+                                </div>
 
                             </div>
 
                         </div>
 
-                    `;
+                        <div class="patient-footer">
 
-                });
+                            <span class="status-badge ${a.status.toLowerCase()}">
+                                ${a.status}
+                            </span>
 
-            })
+                            <a href="/patient/${a.patient_id}" class="profile-btn">
+                                <i class="fa-solid fa-user"></i>
+                                View Profile
+                            </a>
 
-            .catch(error => {
+                        </div>
 
-                console.error(
-                    "Error fetching appointments:",
-                    error
-                );
+                    </div>
+
+                `).join('');
 
             });
 
@@ -258,514 +925,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     });
 
-    // =================================================
-    // RENDER
-    // =================================================
-
     calendar.render();
-
-    // =================================================
-    // NAVIGATION BUTTONS
-    // =================================================
-
-    document.getElementById("prevBtn")
-    .addEventListener("click", function(){
-
-        calendar.prev();
-
-    });
-
-    document.getElementById("nextBtn")
-    .addEventListener("click", function(){
-
-        calendar.next();
-
-    });
 
 });
 
 </script>
-
-<!-- ================================================= -->
-<!-- ================= STYLING ====================== -->
-<!-- ================================================= -->
-
-<style>
-
-/* ================================================= */
-/* ================= CALENDAR CARD ================= */
-/* ================================================= */
-
-.calendar-card{
-
-    background:white;
-
-    border-radius:22px;
-
-    padding:15px;
-
-    box-shadow:0 10px 25px rgba(0,0,0,0.08);
-
-    margin-bottom:20px;
-
-    overflow:hidden;
-}
-
-/* ================================================= */
-/* =============== STICKY HEADER =================== */
-/* ================================================= */
-
-.calendar-sticky-header{
-
-    position:sticky;
-
-    top:0;
-
-    z-index:50;
-
-    background:white;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:space-between;
-
-    padding:10px 0 15px 0;
-
-    border-bottom:1px solid #eee;
-
-    margin-bottom:10px;
-}
-
-#calendarTitle{
-
-    margin:0;
-
-    font-size:24px;
-
-    color:#163b70;
-
-    font-weight:700;
-
-    text-align:center;
-}
-
-/* ================================================= */
-/* ================= NAV BUTTONS =================== */
-/* ================================================= */
-
-.nav-btn{
-
-    background:#163b70;
-
-    color:white;
-
-    border:none;
-
-    width:40px;
-
-    height:40px;
-
-    border-radius:12px;
-
-    font-size:16px;
-
-    cursor:pointer;
-
-    transition:0.2s;
-}
-
-.nav-btn:hover{
-
-    transform:scale(1.05);
-}
-
-/* ================================================= */
-/* ================= CALENDAR ====================== */
-/* ================================================= */
-
-#calendar{
-
-    width:100%;
-}
-
-/* ================================================= */
-/* ================= REMOVE BORDER ================= */
-/* ================================================= */
-
-.fc-theme-standard td,
-.fc-theme-standard th{
-
-    border:1px solid #edf1f7 !important;
-}
-
-/* ================================================= */
-/* ================= DAY BOX ======================= */
-/* ================================================= */
-
-.fc-daygrid-day{
-
-    transition:0.2s;
-
-    min-height:90px !important;
-}
-
-.fc-daygrid-day:hover{
-
-    background:#f4f8ff;
-
-    cursor:pointer;
-}
-
-/* ================================================= */
-/* ================= DATE NUMBER =================== */
-/* ================================================= */
-
-.fc-daygrid-day-number{
-
-    color:#163b70 !important;
-
-    font-weight:bold;
-
-    font-size:14px;
-
-    padding:6px !important;
-}
-
-/* ================================================= */
-/* ================= TODAY ========================= */
-/* ================================================= */
-
-.fc-day-today{
-
-    background:#edf4ff !important;
-}
-
-/* ================================================= */
-/* ================= EVENTS ======================== */
-/* ================================================= */
-
-.fc-event{
-
-    border:none !important;
-
-    border-radius:8px !important;
-
-    padding:2px 4px !important;
-
-    font-size:9px !important;
-
-    font-weight:bold;
-
-    text-align:center;
-
-    margin-top:2px;
-}
-
-/* ================================================= */
-/* ================= BUTTON ======================== */
-/* ================================================= */
-
-.calendar-action{
-
-    margin-bottom:20px;
-}
-
-.manage-btn{
-
-    background:linear-gradient(135deg,#163b70,#2158a8);
-
-    color:white;
-
-    border:none;
-}
-
-/* ================================================= */
-/* ================= APPOINTMENT CARD ============== */
-/* ================================================= */
-
-.appointment-card{
-
-    background:white;
-
-    border-radius:22px;
-
-    padding:20px;
-
-    box-shadow:0 10px 25px rgba(0,0,0,0.08);
-}
-
-.appointment-card h3{
-
-    margin-top:0;
-
-    color:#163b70;
-
-    font-size:24px;
-
-    margin-bottom:18px;
-}
-
-/* ================================================= */
-/* ================= APPOINTMENT BOX =============== */
-/* ================================================= */
-
-.appointment-item{
-
-    background:#f8fbff;
-
-    border-radius:18px;
-
-    padding:16px;
-
-    margin-bottom:15px;
-
-    border:1px solid #e7eef9;
-}
-
-.appoint-row{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    margin-bottom:12px;
-
-    gap:12px;
-}
-
-.appoint-row:last-child{
-
-    margin-bottom:0;
-}
-
-.appoint-label{
-
-    font-weight:bold;
-
-    color:#163b70;
-
-    font-size:14px;
-}
-
-.appoint-value{
-
-    color:#333;
-
-    font-size:14px;
-
-    text-align:right;
-
-    word-break:break-word;
-}
-
-/* ================================================= */
-/* ================= EMPTY BOX ===================== */
-/* ================================================= */
-
-.empty-box{
-
-    text-align:center;
-
-    padding:30px 20px;
-
-    background:#f8fbff;
-
-    border-radius:18px;
-
-    color:#777;
-
-    font-weight:bold;
-}
-
-/* ================================================= */
-/* ================= STATUS ======================== */
-/* ================================================= */
-
-.status-badge{
-
-    padding:6px 14px;
-
-    border-radius:30px;
-
-    font-size:11px;
-
-    font-weight:bold;
-}
-
-.approved{
-
-    background:#dff6dd;
-
-    color:#2e7d32;
-}
-
-.pending{
-
-    background:#fff3cd;
-
-    color:#856404;
-}
-
-.rejected{
-
-    background:#ffdede;
-
-    color:#b42318;
-}
-
-/* ================================================= */
-/* ================= MOBILE ======================== */
-/* ================================================= */
-
-@media(max-width:768px){
-
-.calendar-card{
-
-    padding:10px;
-}
-
-/* ================================================ */
-/* HEADER */
-/* ================================================ */
-
-.calendar-sticky-header{
-
-    padding-top:5px;
-
-    padding-bottom:12px;
-}
-
-#calendarTitle{
-
-    font-size:18px;
-}
-
-.nav-btn{
-
-    width:34px;
-
-    height:34px;
-
-    font-size:13px;
-
-    border-radius:10px;
-}
-
-/* ================================================ */
-/* CALENDAR */
-/* ================================================ */
-
-.fc{
-
-    font-size:11px !important;
-}
-
-.fc-col-header-cell-cushion{
-
-    font-size:11px !important;
-
-    padding:4px 0 !important;
-}
-
-.fc-daygrid-day{
-
-    min-height:60px !important;
-}
-
-.fc-daygrid-day-number{
-
-    font-size:11px !important;
-
-    padding:3px !important;
-}
-
-.fc-event{
-
-    font-size:7px !important;
-
-    padding:1px 2px !important;
-}
-
-/* ================================================ */
-/* APPOINTMENTS */
-/* ================================================ */
-
-.appointment-card{
-
-    padding:15px;
-}
-
-.appointment-card h3{
-
-    font-size:18px;
-
-    line-height:1.5;
-}
-
-.appointment-item{
-
-    padding:14px;
-}
-
-.appoint-row{
-
-    flex-direction:column;
-
-    align-items:flex-start;
-
-    gap:5px;
-}
-
-.appoint-value{
-
-    text-align:left;
-
-    width:100%;
-}
-
-/* ================================================ */
-/* REMOVE SCROLL */
-/* ================================================ */
-
-.fc-scroller{
-
-    overflow:hidden !important;
-}
-
-}
-
-/* ================================================= */
-/* EXTRA SMALL MOBILE */
-/* ================================================= */
-
-@media(max-width:480px){
-
-.fc-daygrid-day{
-
-    min-height:52px !important;
-}
-
-.fc-daygrid-day-number{
-
-    font-size:10px !important;
-}
-
-.fc-event{
-
-    font-size:6px !important;
-}
-
-#calendarTitle{
-
-    font-size:16px;
-}
-
-}
-
-</style>
 
 {% endblock %}
