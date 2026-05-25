@@ -13,9 +13,13 @@ import smtplib
 from email.mime.text import MIMEText
 
 def send_email(to_email, subject, body):
-    # USE YOUR REAL GMAIL AND APP PASSWORD HERE
-    smtp_user = "fa735594@gmail.com"  
-    smtp_pass = "nkeywhmgqizhozbd"  # Combined into one single 16-letter string!
+    # These will look for the keys you add in the Render Dashboard
+    smtp_user = os.environ.get("MAIL_USERNAME")
+    smtp_pass = os.environ.get("MAIL_PASSWORD")
+
+    if not smtp_user or not smtp_pass:
+        print("❌ [ERROR] Email credentials not found in Environment Variables!")
+        return False
 
     msg = MIMEText(body)
     msg["Subject"] = subject
@@ -23,19 +27,18 @@ def send_email(to_email, subject, body):
     msg["To"] = to_email
 
     try:
-        print(f"📡 [GMAIL CONNECT] Connecting to Gmail Production via Port 587...")
-        # Port 587 is the standard for live web app delivery
+        print(f"📡 [GMAIL CONNECT] Connecting to Gmail...")
         server = smtplib.SMTP("smtp.gmail.com", 587, timeout=15)
-        server.starttls()  # Secure connection
+        server.starttls()
         
-        print("🔐 [GMAIL AUTH] Logging in with App Password...")
+        print("🔐 [GMAIL AUTH] Authenticating...")
         server.login(smtp_user, smtp_pass)
         
-        print(f"📤 [GMAIL SEND] Sending live email to: {to_email}...")
+        print(f"📤 [GMAIL SEND] Sending to: {to_email}")
         server.sendmail(smtp_user, [to_email], msg.as_string())
         server.quit()
         
-        print(f"✅ [LIVE SUCCESS] Email delivered to real inbox: {to_email}!")
+        print(f"✅ [SUCCESS] Email delivered to {to_email}!")
         return True
     except Exception as e:
         print(f"❌ [LIVE ERROR] Gmail rejected connection: {str(e)}")
