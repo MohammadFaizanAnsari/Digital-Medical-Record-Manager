@@ -261,8 +261,6 @@
     padding: 3px 8px;
     border-radius: var(--radius-pill);
     text-transform: uppercase;
-    background: var(--pt-vital-bg);
-    color: var(--pt-vital);
 }
 
 .medication-spec-grid {
@@ -600,32 +598,40 @@
                     </button>
                 </div>
 
-                <div id="pane-meds" class="p-tab-content active-pane">
-                    {% if medicines %}
-                    <div class="medication-matrix-grid">
-                        {% for med in medicines %}
-                        <div class="medication-line-card">
-                            <div class="medication-header-row">
-                                <span class="medication-title">{{ med.medicine_name }}</span>
-                                <span class="pill-active-tag">Active</span>
-                            </div>
-                            <div class="medication-spec-grid">
-                                <div class="spec-meta-block"><label>Dosage</label><span>{{ med.dosage if med.dosage else 'N/A' }}</span></div>
-                                <div class="spec-meta-block"><label>Times/Day</label><span>{{ med.times_per_day if med.times_per_day else 'N/A' }}</span></div>
-                                <div class="spec-meta-block"><label>Total Days</label><span>{{ med.total_days if med.total_days else 'N/A' }}</span></div>
-                                <div class="spec-meta-block"><label>Quantity</label><span>{{ med.quantity if med.quantity else 'N/A' }}</span></div>
-                                <div class="spec-meta-block form-full-row" style="grid-column: 1 / -1; margin-top: 4px;"><label>Start Date</label><span>{{ med.start_date }}</span></div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <div class="fallback-null-pane">
-                        <i class="fa-solid fa-capsules"></i>
-                        <p>No active prescription protocols tracked to this portal.</p>
-                    </div>
-                    {% endif %}
-                </div>
+<div id="pane-meds" class="p-tab-content active-pane">
+    {% if medicines %}
+    <div class="medication-matrix-grid">
+        {% for med in medicines %}
+        <div class="medication-line-card">
+            <div class="medication-header-row">
+                <span class="medication-title">{{ med.medicine_name }}</span>
+                
+                {# Dynamic Status Styling #}
+                {% if med.status == 'Finished' %}
+                    <span class="pill-active-tag" style="background: #f1f5f9; color: #64748b;">Finished</span>
+                {% elif med.status == 'Finishing Today' %}
+                    <span class="pill-active-tag" style="background: #fffbeb; color: #d97706;">{{ med.label }}</span>
+                {% else %}
+                    <span class="pill-active-tag" style="background: #ecfdf5; color: #10b981;">{{ med.label }}</span>
+                {% endif %}
+            </div>
+            
+            <div class="medication-spec-grid">
+                <div class="spec-meta-block"><label>Dosage</label><span>{{ med.dosage }}</span></div>
+                <div class="spec-meta-block"><label>Times/Day</label><span>{{ med.times_per_day }}</span></div>
+                <div class="spec-meta-block"><label>Start</label><span>{{ med.start_date }}</span></div>
+                <div class="spec-meta-block"><label>End</label><span>{{ med.end_date }}</span></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="fallback-null-pane">
+        <i class="fa-solid fa-capsules"></i>
+        <p>No active prescription protocols tracked to this portal.</p>
+    </div>
+    {% endif %}
+</div>
 
                 <div id="pane-visits" class="p-tab-content">
                     {% if visits %}

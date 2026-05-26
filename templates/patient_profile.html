@@ -31,12 +31,28 @@
 
     --radius-premium: 16px;
     --radius-pill: 9999px;
-    --shadow-premium: 0 4px 6px -1px rgba(15, 23, 42, 0.03), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
-    --shadow-card: 0 10px 15px -3px rgba(15, 23, 42, 0.04), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
-    --shadow-glow: 0 0 0 4px rgba(37, 99, 235, 0.12);
-    
-    --fx-spring: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
-    --fx-smooth: all 0.2s ease;
+    --shadow-card: 0 10px 15px -3px rgba(15, 23, 42, 0.04);
+}
+
+/* ADDED: Status Tag Styles */
+.pill-active-tag {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+    text-transform: uppercase;
+    background: var(--clr-vital-bg);
+    color: var(--clr-vital);
+}
+
+.status-finished {
+    background: #fee2e2 !important;
+    color: #ef4444 !important;
+}
+
+.status-warning {
+    background: #fef3c7 !important;
+    color: #d97706 !important;
 }
 
 .clinical-workspace-wrapper {
@@ -831,20 +847,26 @@ textarea {
                 {% if medicines %}
                 <div class="medication-matrix-grid">
                     {% for med in medicines %}
-                    <div class="medication-line-card">
-                        <div class="medication-header-row">
-                            <span class="medication-title">{{ med.medicine_name }}</span>
-                            <span class="status-indicator-badge">Active</span>
-                        </div>
-                        <div class="medication-spec-grid">
-                            <div class="spec-meta-block"><label>Dosage</label><span>{{ med.dosage if med.dosage else 'N/A' }}</span></div>
-                            <div class="spec-meta-block"><label>Times/Day</label><span>{{ med.times_per_day if med.times_per_day else 'N/A' }}</span></div>
-                            <div class="spec-meta-block"><label>Total Days</label><span>{{ med.total_days if med.total_days else 'N/A' }}</span></div>
-                            <div class="spec-meta-block"><label>Quantity</label><span>{{ med.quantity if med.quantity else 'N/A' }}</span></div>
-                            <div class="spec-meta-block form-full-row" style="margin-top: 4px;"><label>Start Date Reference</label><span>{{ med.start_date }}</span></div>
-                        </div>
-                    </div>
-                    {% endfor %}
+<div class="medication-line-card">
+    <div class="medication-header-row">
+        <span class="medication-title">{{ med.medicine_name }}</span>
+        
+        <span class="pill-active-tag {% if 'Finished' in med.status %}status-finished{% elif 'Today' in med.status %}status-warning{% endif %}">
+            {{ med.status }}
+        </span>
+    </div>
+    
+    <div class="medication-spec-grid">
+        <div class="spec-meta-block"><label>Dosage</label><span>{{ med.dosage if med.dosage else 'N/A' }}</span></div>
+        <div class="spec-meta-block"><label>Times/Day</label><span>{{ med.times_per_day if med.times_per_day else 'N/A' }}</span></div>
+        <div class="spec-meta-block"><label>Total Days</label><span>{{ med.total_days if med.total_days else 'N/A' }}</span></div>
+        <div class="spec-meta-block"><label>Quantity</label><span>{{ med.quantity if med.quantity else 'N/A' }}</span></div>
+        
+        <div class="spec-meta-block"><label>Start Date</label><span>{{ med.start_date }}</span></div>
+        <div class="spec-meta-block"><label>End Date</label><span>{{ med.end_date }}</span></div>
+    </div>
+</div>
+{% endfor %}
                 </div>
                 {% else %}
                 <div class="fallback-null-pane">

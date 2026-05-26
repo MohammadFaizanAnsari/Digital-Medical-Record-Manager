@@ -323,6 +323,8 @@ def delete_patient(patient_id):
     return redirect("/patients")
 
 # ---------------- PATIENT PROFILE ----------------
+from datetime import datetime, date, timedelta
+
 @app.route("/patient/<int:id>")
 def patient_profile(id):
     if not is_logged_in():
@@ -332,53 +334,65 @@ def patient_profile(id):
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
+    # 1. Fetch Basic Data
     cur.execute("SELECT * FROM patients WHERE id=?", (id,))
     patient = cur.fetchone()
 
     cur.execute("SELECT * FROM patient_reports WHERE patient_id=? ORDER BY uploaded_at DESC", (id,))
     reports = cur.fetchall()
 
-    cur.execute("SELECT * FROM medicines WHERE patient_id=?", (id,))
-    medicines = cur.fetchall()
-
     cur.execute("SELECT * FROM visits WHERE patient_id=? ORDER BY visit_date DESC", (id,))
     visits = cur.fetchall()
 
-    updated_medicines = []
-    for med in medicines:
-        try:
-            start_date = med["start_date"]
-            duration = med["total_days"]
-            start = datetime.strptime(start_date, "%Y-%m-%d")
-            end = start + timedelta(days=int(duration))
-            today = datetime.now()
+    # 2. Fetch and Process Medicines with End Date Logic
+    cur.execute("SELECT * FROM medicines WHERE patient_id=?", (id,))
+    medicines = cur.fetchall()
 
-            if today > end:
+    updated_medicines = []
+    today = date.today()
+
+    for med in medicines:
+        # Defaults
+        status = "Active"
+        end_date_str = "N/A"
+        
+        try:
+            # Parse start date and duration
+            start_date = datetime.strptime(med["start_date"], "%Y-%m-%d").date()
+            duration = int(med["total_days"])
+            
+            # Calculate end date
+            end_date = start_date + timedelta(days=duration)
+            end_date_str = end_date.strftime("%Y-%m-%d")
+
+            # Determine Status
+            if today > end_date:
                 status = "Finished ❌"
             else:
-                days_left = (end - today).days
-                if days_left <= 0:
+                days_left = (end_date - today).days
+                if days_left == 0:
                     status = "Finishing Today ⚠️"
                 elif days_left == 1:
                     status = "Finishing Tomorrow ⚠️"
                 else:
                     status = f"{days_left} days left"
-        except Exception:
-            status = "Unknown"
-            start_date = med["start_date"]
-            duration = med["total_days"]
+        except (ValueError, TypeError):
+            status = "Invalid Date/Duration"
 
+        # Create dictionary for the template
         updated_medicines.append({
             "medicine_name": med["medicine_name"],
             "dosage": med["dosage"],
             "times_per_day": med["times_per_day"],
             "quantity": med["quantity"],
-            "start_date": start_date,
-            "duration": duration,
+            "start_date": med["start_date"],
+            "end_date": end_date_str,
+            "total_days": med["total_days"],
             "status": status
         })
 
     conn.close()
+
     return render_template(
         "patient_profile.html",
         patient=patient,
@@ -388,6 +402,8 @@ def patient_profile(id):
     )
 
 # ---------------- PATIENT DASHBOARD ----------------
+from datetime import datetime, date, timedelta
+
 @app.route("/patient_dashboard")
 def patient_dashboard():
     if not is_logged_in() or session.get("role") != "patient":
@@ -398,9 +414,11 @@ def patient_dashboard():
     conn.row_factory = sqlite3.Row  
     cur = conn.cursor()
 
+    # 1. Fetch Patient Info
     cur.execute("SELECT * FROM patients WHERE id=?", (patient_id,))
     patient = cur.fetchone()
 
+    # 2. Fetch History & Records
     cur.execute("SELECT * FROM visits WHERE patient_id=? ORDER BY visit_date DESC", (patient_id,))
     visits = cur.fetchall()
 
@@ -410,30 +428,45 @@ def patient_dashboard():
     cur.execute("SELECT * FROM patient_reports WHERE patient_id=? ORDER BY uploaded_at DESC", (patient_id,))
     reports = cur.fetchall()
 
-    medicine_alerts = []
-    today = datetime.today()
+    # 3. Calculate Alerts and Process Medicines
+    processed_medicines = []
+    today = date.today()
+
     for med in medicines:
         try:
-            start = datetime.strptime(med["start_date"], "%Y-%m-%d")
-            refill = start + timedelta(days=int(med["total_days"]))
-            days_left = (refill - today).days
+            start_date = datetime.strptime(med["start_date"], "%Y-%m-%d").date()
+            duration = int(med["total_days"])
+            end_date = start_date + timedelta(days=duration)
+            days_left = (end_date - today).days
 
+            # Logic for Status
             if days_left < 0:
-                msg = f"{med['medicine_name']} ran out {abs(days_left)} days ago"
+                status = "Finished"
+                label = "Finished"
             elif days_left == 0:
-                msg = f"{med['medicine_name']} will run out today"
+                status = "Finishing Today"
+                label = "Finishing Today ⚠️"
             elif days_left == 1:
-                msg = f"{med['medicine_name']} will run out tomorrow"
-            elif days_left <= 3:
-                msg = f"{med['medicine_name']} will run out in {days_left} days"
+                status = "Active"
+                label = "1 day left ⏳"
             else:
-                msg = f"{med['medicine_name']} refill on {refill.strftime('%Y-%m-%d')}"
-            
-            medicine_alerts.append(msg)
-        except Exception as e:
-            print(f"Error calculating alerts for {med['medicine_name']}: {e}")
+                status = "Active"
+                label = f"{days_left} days left"
 
-    # UPDATED: Fetches only the 5 most recent requests, newest first
+            processed_medicines.append({
+                "medicine_name": med["medicine_name"],
+                "dosage": med["dosage"],
+                "times_per_day": med["times_per_day"],
+                "quantity": med["quantity"],
+                "start_date": med["start_date"],
+                "end_date": end_date.strftime("%Y-%m-%d"),
+                "status": status,
+                "label": label
+            })
+        except Exception as e:
+            print(f"Error processing medicine: {e}")
+
+    # 4. Fetch Appointments
     cur.execute("""
         SELECT requested_date, status 
         FROM appointments 
@@ -449,11 +482,23 @@ def patient_dashboard():
         "patient_dashboard.html",
         patient=patient,
         visits=visits,
-        medicines=medicines,       
-        reports=reports,          
-        medicine_alerts=medicine_alerts,
+        medicines=processed_medicines, # Pass the processed list
+        reports=reports,
         appointments=appointments
     )
+    
+    # ---------------- MANUAL MEDICINE REMINDERS ----------------
+@app.route("/manual_send_reminders", methods=["POST"])
+def manual_send_reminders():
+    if not is_logged_in() or session.get("role") != "admin":
+        return redirect("/login")
+    
+    # Call the existing logic
+    check_medicine_refills()
+    
+    flash("Manual refill reminders have been processed for all patients.")
+    return redirect("/dashboard")
+    
 # ---------------- REQUEST APPOINTMENT ----------------
 @app.route("/request_appointment", methods=["GET", "POST"])
 def request_appointment():
@@ -743,50 +788,56 @@ def check_medicine_refills():
     conn = sqlite3.connect(DATABASE, timeout=20)
     conn.row_factory = sqlite3.Row  
     cur = conn.cursor()
-
-    today = datetime.now().date()
+    today = date.today()
 
     cur.execute("""
         SELECT m.*, p.name as patient_name, p.email
         FROM medicines m
         JOIN patients p ON m.patient_id = p.id
     """)
-
     medicines = cur.fetchall()
 
     for med in medicines:
         try:
             start_date = datetime.strptime(med["start_date"], "%Y-%m-%d").date()
-            duration_days = int(med["total_days"]) if med["total_days"] else 0
+            duration_days = int(med["total_days"] or 0)
             end_date = start_date + timedelta(days=duration_days)
             days_left = (end_date - today).days
 
-            print(f"Background Verification Tracker: {med['medicine_name']} | Days remaining: {days_left}")
+            # Logic:
+            # - days_left > 3: Too early (No reminder)
+            # - 0 <= days_left <= 3: Active reminder window
+            # - -3 <= days_left < 0: Post-completion buffer (3 days after end)
+            # - days_left < -3: System stops all reminders
 
-            is_reminder_sent = med["reminder_sent"] if med["reminder_sent"] is not None else 0
+            if 0 <= days_left <= 3:
+                # Active Window: Send/Process if not already done
+                if not med["reminder_sent"]:
+                    subject = "Prescription Course Status"
+                    message = f"Hello {med['patient_name']},\n\nYour medicine '{med['medicine_name']}' status: {days_left} days remaining."
+                    if med["email"]: send_email(med["email"], subject, message)
+                    
+                    cur.execute("UPDATE medicines SET reminder_sent = 1 WHERE id = ?", (med["id"],))
+                    conn.commit()
 
-            if 0 <= days_left <= 3 and is_reminder_sent == 0:
-                subject = "Prescription Course Concluding Soon"
-                message = f"Hello {med['patient_name']},\n\nThis is an automated reminder that your prescribed course for '{med['medicine_name']}' will conclude in {days_left} day(s).\n\nPlease open your portal application dashboard to check your schedule status configuration updates.\n\nThank you,\nDigital Medical Record System"
+            elif -3 <= days_left < 0:
+                # Post-Completion Window: Send final notice if in this specific 3-day buffer
+                if med["reminder_sent"] == 1:
+                    subject = "Prescription Course Concluded"
+                    message = f"Hello {med['patient_name']},\n\nYour course for '{med['medicine_name']}' concluded {abs(days_left)} days ago."
+                    if med["email"]: send_email(med["email"], subject, message)
+                    
+                    cur.execute("UPDATE medicines SET reminder_sent = 2 WHERE id = ?", (med["id"],))
+                    conn.commit()
 
-                if med["email"] and "@" in med["email"]:
-                    send_email(med["email"], subject, message)
-
-                cur.execute("UPDATE medicines SET reminder_sent = 1 WHERE id = ?", (med["id"],))
-                conn.commit()
-
-            elif days_left < 0 and is_reminder_sent == 1:
-                subject = "Prescription Medication Course Completed"
-                message = f"Hello {med['patient_name']},\n\nYour prescribed treatment schedule for '{med['medicine_name']}' has officially ended.\n\nPlease stop taking this medication as directed by your schedule unless explicitly instructed otherwise by your doctor.\n\nThank you,\nDigital Medical Record System"
-
-                if med["email"] and "@" in med["email"]:
-                    send_email(med["email"], subject, message)
-                
-                cur.execute("UPDATE medicines SET reminder_sent = 2 WHERE id = ?", (med["id"],))
-                conn.commit()
+            elif days_left < -3:
+                # Stop/Clear logic: System effectively ignores this medicine now
+                if med["reminder_sent"] != 0:
+                    cur.execute("UPDATE medicines SET reminder_sent = 0 WHERE id = ?", (med["id"],))
+                    conn.commit()
 
         except Exception as e:
-            print(f"Error checking background execution metrics for medicine ID {med.get('id', 'Unknown')}: {e}")
+            print(f"Error in scheduler for ID {med.get('id')}: {e}")
 
     conn.close()
 

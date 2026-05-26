@@ -376,6 +376,19 @@
         font-size: 14px;
     }
 }
+
+/* New Purple Gradient Button Style */
+.dd-purple {
+    background: linear-gradient(135deg, #6b46c1, #805ad5);
+}
+
+/* Ensure the button element inside the form matches the link button styling */
+.dd-actions form button.dd-action-btn {
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+    margin: 0;
+}
 </style>
 
 <div class="dashboard-wrapper">
@@ -398,17 +411,23 @@
         </div>
 
         <div class="dd-actions">
-            <a href="/appointments" class="dd-action-btn dd-blue">
-                <i class="fa-solid fa-calendar-check"></i> Appointments
-                {% if pending_appointments > 0 %}
-                    <span class="dd-dot"></span>
-                {% endif %}
-            </a>
+    <form action="/manual_send_reminders" method="POST" style="margin:0;">
+        <button type="submit" class="dd-action-btn dd-purple">
+            <i class="fa-solid fa-bell"></i> Send Reminders
+        </button>
+    </form>
 
-            <a href="/appointment_calendar" class="dd-action-btn dd-green">
-                <i class="fa-solid fa-calendar-days"></i> See Calendar
-            </a>
-        </div>
+    <a href="/appointments" class="dd-action-btn dd-blue">
+        <i class="fa-solid fa-calendar-check"></i> Appointments
+        {% if pending_appointments > 0 %}
+            <span class="dd-dot"></span>
+        {% endif %}
+    </a>
+
+    <a href="/appointment_calendar" class="dd-action-btn dd-green">
+        <i class="fa-solid fa-calendar-days"></i> See Calendar
+    </a>
+</div>
     </div>
 
     <div class="dd-stats">
