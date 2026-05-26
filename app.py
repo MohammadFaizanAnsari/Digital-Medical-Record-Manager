@@ -433,8 +433,14 @@ def patient_dashboard():
         except Exception as e:
             print(f"Error calculating alerts for {med['medicine_name']}: {e}")
 
-    # Fetches all submitted requests for display in the table
-    cur.execute("SELECT * FROM appointments WHERE patient_id=? ORDER BY id DESC", (patient_id,))
+    # UPDATED: Fetches only the 5 most recent requests, newest first
+    cur.execute("""
+        SELECT requested_date, status 
+        FROM appointments 
+        WHERE patient_id=? 
+        ORDER BY id DESC 
+        LIMIT 5
+    """, (patient_id,))
     appointments = cur.fetchall()
     
     conn.close()
@@ -448,7 +454,6 @@ def patient_dashboard():
         medicine_alerts=medicine_alerts,
         appointments=appointments
     )
-
 # ---------------- REQUEST APPOINTMENT ----------------
 @app.route("/request_appointment", methods=["GET", "POST"])
 def request_appointment():
@@ -832,4 +837,4 @@ def run_scheduler():
 threading.Thread(target=run_scheduler, daemon=True).start()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)

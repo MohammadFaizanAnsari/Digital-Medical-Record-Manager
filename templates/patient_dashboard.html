@@ -51,9 +51,6 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ================================================= */
-/* ================= ASYMMETRIC PORTAL GRID ======== */
-/* ================================================= */
 .portal-grid-engine {
     display: grid;
     grid-template-columns: 340px 1fr;
@@ -61,9 +58,6 @@
     align-items: start;
 }
 
-/* ================================================= */
-/* ================= PERSISTENT SIDEBAR CONSOLE ==== */
-/* ================================================= */
 .patient-profile-card {
     background: var(--pt-surface);
     border: 1px solid var(--pt-border);
@@ -173,9 +167,6 @@
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
-/* ================================================= */
-/* ================= PORTAL COMPONENT CARDS ======== */
-/* ================================================= */
 .portal-panel-card {
     background: var(--pt-surface);
     border: 1px solid var(--pt-border);
@@ -199,9 +190,6 @@
     color: var(--pt-brand);
 }
 
-/* ================================================= */
-/* ================= SEGMENTED TAB SWITCHER ======== */
-/* ================================================= */
 .portal-tabs-bar {
     display: flex;
     background: #f1f5f9;
@@ -241,9 +229,6 @@
     display: block;
 }
 
-/* ================================================= */
-/* ================= PRESCRIPTIONS LIST WORKSPACE == */
-/* ================================================= */
 .medication-matrix-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -307,9 +292,6 @@
     color: var(--pt-navy);
 }
 
-/* ================================================= */
-/* ================= CHECKUP VISIT TIMELINE ======== */
-/* ================================================= */
 .visit-timeline-chassis {
     position: relative;
     padding-left: 24px;
@@ -379,9 +361,6 @@
     line-height: 1.5;
 }
 
-/* ================================================= */
-/* ================= APPOINTMENT SCHEDULER ROW ====== */
-/* ================================================= */
 .form-flex-row {
     display: flex;
     gap: 16px;
@@ -431,7 +410,6 @@
     transform: translateY(-1px);
 }
 
-/* Medical Report Rows Architecture */
 .reports-list-container {
     display: flex;
     flex-direction: column;
@@ -500,7 +478,18 @@
 .b-view { background: var(--pt-brand-light); color: var(--pt-brand); }
 .b-view:hover { background: var(--pt-brand); color: #ffffff; }
 
-/* Global Fallback Blank Slates */
+.status-pill {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.pending { background: #fef3c7; color: #d97706; }
+.approved { background: #ecfdf5; color: #10b981; }
+.rejected { background: #fee2e2; color: #ef4444; }
+.premium-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.premium-table td, .premium-table th { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+
 .fallback-null-pane {
     text-align: center;
     padding: 32px 16px;
@@ -516,9 +505,6 @@
 }
 .fallback-null-pane p { margin: 0; font-size: 14px; font-weight: 500; }
 
-/* ================================================= */
-/* ================= SMOOTH RESPONSIVE BREAKPOINTS = */
-/* ================================================= */
 @media (max-width: 992px) {
     .portal-grid-engine {
         grid-template-columns: 1fr;
@@ -676,14 +662,40 @@
                 <form method="POST" action="{{ url_for('request_appointment') }}">
                     <div class="form-flex-row">
                         <div class="field-cell">
-                            <label>Select Preferred Date & Time</label>
-                            <input type="text" name="requested_date" class="modern-datetime-picker" placeholder="Choose your preferred appointment schedule..." required>
+                            <label>Select Preferred Date</label>
+                            <input type="text" name="requested_date" class="modern-datetime-picker" placeholder="Choose your preferred appointment date..." required>
                         </div>
                         <button type="submit" class="portal-action-btn btn-commit" style="height: 46px; width: auto; padding: 0 28px;">
                             <i class="fa-solid fa-paper-plane"></i> Send Request
                         </button>
                     </div>
                 </form>
+            </div>
+
+            <div class="portal-panel-card">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Appointments</h3>
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appt in appointments %}
+                        <tr>
+                            <td>{{ appt[0] }}</td>
+                            <td>
+                                <span class="status-pill {{ appt[1]|lower }}">
+                                    {{ appt[1] }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="2" style="text-align:center; color:var(--pt-muted);">No recent requests found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
 
             <div class="portal-panel-card">
@@ -729,23 +741,18 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // Elegant Flatpickr Initialization Setup 
+    // Elegant Flatpickr Initialization - Date only
     flatpickr(".modern-datetime-picker", {
-        enableTime: true,
-        dateFormat: "Y-m-d H:i",
-        minDate: "today",
-        time_24hr: false
+        enableTime: false,
+        dateFormat: "Y-m-d",
+        minDate: "today"
     });
 });
 
 function togglePortalPane(event, paneId) {
     const contextCard = event.currentTarget.closest('.portal-panel-card');
-    
-    // Wipe active classes on siblings
     contextCard.querySelectorAll('.p-tab-trigger').forEach(btn => btn.classList.remove('active-pane'));
     contextCard.querySelectorAll('.p-tab-content').forEach(pane => pane.classList.remove('active-pane'));
-    
-    // Active states assignment targets
     event.currentTarget.classList.add('active-pane');
     contextCard.querySelector('#' + paneId).classList.add('active-pane');
 }
