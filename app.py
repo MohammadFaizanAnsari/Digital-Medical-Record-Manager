@@ -630,6 +630,24 @@ def calendar_data():
         GROUP BY requested_date
     """, (doctor_id,))
     
+    events = []
+    for row in cur.fetchall():
+        date, count = row
+        # Color coding: Green (1-5), Orange (6-8), Red (>8)
+        color = '#dc2626' if count > 8 else ('#d97706' if count >= 5 else '#16a34a')
+        
+        events.append({
+            # The title now shows the count and the bell icon
+            "title": f" {count} Appts", 
+            "start": date,
+            "backgroundColor": color,
+            "borderColor": color,
+            "textColor": "#ffffff",
+            "allDay": True,
+            "extendedProps": { "count": count } # Pass count to handle icon later
+        })
+    conn.close()
+    return jsonify(events)
     # Transform count into visual events
     events = []
     for row in cur.fetchall():

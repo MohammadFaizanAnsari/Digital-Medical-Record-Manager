@@ -2,13 +2,21 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<!-- ==========================================================================
+     ULTRA PREMIUM MEDICAL APPOINTMENT DASHBOARD
+     ========================================================================== -->
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 
 <style>
 
 /* ==========================================================================
-   PREMIUM MEDICAL CALENDAR DASHBOARD
+   ROOT VARIABLES
    ========================================================================== */
 
 :root{
@@ -17,50 +25,91 @@
     --primary-dark:#1d4ed8;
     --primary-light:#dbeafe;
 
-    --success:#16a34a;
-    --success-light:#dcfce7;
-
-    --warning:#d97706;
-    --warning-light:#fef3c7;
-
-    --danger:#dc2626;
-    --danger-light:#fee2e2;
+    --secondary:#0f172a;
+    --secondary-soft:#1e293b;
 
     --surface:#ffffff;
     --surface-soft:#f8fafc;
 
-    --background:#f1f5f9;
+    --success:#16a34a;
+    --warning:#f59e0b;
+    --danger:#ef4444;
 
     --border:#e2e8f0;
-
     --text:#0f172a;
     --muted:#64748b;
 
-    --shadow:
-    0 10px 30px rgba(15,23,42,0.08);
+    --glass:rgba(255,255,255,0.78);
 
-    --radius-xl:30px;
-    --radius-lg:22px;
-    --radius-md:16px;
+    --shadow-sm:0 4px 12px rgba(15,23,42,0.05);
+    --shadow-md:0 12px 28px rgba(15,23,42,0.08);
+    --shadow-lg:0 22px 55px rgba(15,23,42,0.12);
+
+    --radius-xl:34px;
+    --radius-lg:26px;
+    --radius-md:18px;
 }
 
 /* ==========================================================================
-   BODY
+   GLOBAL
    ========================================================================== */
 
 body{
+
+    font-family:'Plus Jakarta Sans',sans-serif !important;
+
     background:
-    radial-gradient(circle at top left, rgba(37,99,235,0.07), transparent 30%),
-    radial-gradient(circle at bottom right, rgba(14,165,233,0.07), transparent 25%),
-    var(--background);
+    radial-gradient(circle at top left, rgba(37,99,235,0.08), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(14,165,233,0.08), transparent 24%),
+    linear-gradient(180deg,#f8fbff,#eef4ff);
+
+    min-height:100vh;
+}
+
+/* Floating background glow */
+
+body::before{
+    content:"";
+    position:fixed;
+    top:-150px;
+    left:-120px;
+
+    width:400px;
+    height:400px;
+
+    background:rgba(37,99,235,0.12);
+
+    border-radius:50%;
+
+    filter:blur(100px);
+
+    z-index:-1;
+}
+
+body::after{
+    content:"";
+    position:fixed;
+    bottom:-120px;
+    right:-120px;
+
+    width:350px;
+    height:350px;
+
+    background:rgba(14,165,233,0.10);
+
+    border-radius:50%;
+
+    filter:blur(100px);
+
+    z-index:-1;
 }
 
 /* ==========================================================================
-   LAYOUT
+   MAIN LAYOUT
    ========================================================================== */
 
-.calendar-dashboard{
-    padding:18px 0 25px;
+.dashboard-wrapper{
+    padding:24px 0 30px;
 }
 
 .dashboard-grid{
@@ -71,37 +120,55 @@ body{
 }
 
 @media(max-width:1200px){
+
     .dashboard-grid{
         grid-template-columns:1fr;
     }
 }
 
 /* ==========================================================================
-   CARDS
+   ULTRA GLASS CARD
    ========================================================================== */
 
-.glass-card{
+.ultra-card{
 
-    background:rgba(255,255,255,0.92);
+    background:var(--glass);
 
-    border:1px solid rgba(255,255,255,0.6);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+
+    border:1px solid rgba(255,255,255,0.5);
 
     border-radius:var(--radius-xl);
 
-    box-shadow:var(--shadow);
-
     overflow:hidden;
+
+    box-shadow:
+    0 10px 30px rgba(15,23,42,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.5);
 
     position:relative;
 
-    backdrop-filter:blur(12px);
+    animation:fadeUp 0.7s ease;
 }
 
-.glass-card::before{
+@keyframes fadeUp{
+    from{
+        opacity:0;
+        transform:translateY(25px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.ultra-card::before{
     content:"";
     position:absolute;
     top:0;
     left:0;
+
     width:100%;
     height:5px;
 
@@ -115,97 +182,142 @@ body{
 }
 
 /* ==========================================================================
-   HEADERS
+   HEADER
    ========================================================================== */
 
 .dashboard-header{
-    padding:28px 30px 20px;
-    border-bottom:1px solid #edf2f7;
+
+    padding:32px 34px 24px;
+
+    border-bottom:1px solid rgba(226,232,240,0.7);
 
     display:flex;
     justify-content:space-between;
     align-items:center;
-    gap:15px;
+    gap:20px;
     flex-wrap:wrap;
 }
 
-.dashboard-header h2{
+.header-content h2{
+
     margin:0;
-    font-size:1.7rem;
+
+    font-size:1.9rem;
     font-weight:800;
-    color:var(--text);
-    letter-spacing:-0.5px;
+
+    color:var(--secondary);
+
+    letter-spacing:-0.7px;
 }
 
-.dashboard-header p{
-    margin:8px 0 0;
+.header-content p{
+
+    margin:10px 0 0;
+
     color:var(--muted);
-    font-size:0.92rem;
+
+    font-size:0.95rem;
+    font-weight:500;
 }
 
-.live-status{
-    background:#f8fafc;
-    border:1px solid #e2e8f0;
+/* ==========================================================================
+   LIVE BADGE
+   ========================================================================== */
 
-    padding:12px 16px;
-
-    border-radius:16px;
+.live-badge{
 
     display:flex;
     align-items:center;
     gap:10px;
+
+    background:
+    linear-gradient(
+        135deg,
+        rgba(37,99,235,0.10),
+        rgba(59,130,246,0.10)
+    );
+
+    padding:13px 18px;
+
+    border-radius:18px;
+
+    border:1px solid rgba(37,99,235,0.12);
 }
 
 .live-dot{
-    width:10px;
-    height:10px;
-    border-radius:50%;
+
+    width:11px;
+    height:11px;
+
     background:#22c55e;
+
+    border-radius:50%;
 
     position:relative;
 }
 
 .live-dot::after{
+
     content:"";
+
     position:absolute;
-    inset:-4px;
+
+    inset:-5px;
+
     border-radius:50%;
-    border:2px solid rgba(34,197,94,0.25);
+
+    border:2px solid rgba(34,197,94,0.3);
 
     animation:pulse 2s infinite;
 }
 
 @keyframes pulse{
-    0%{transform:scale(0.7);opacity:1;}
-    100%{transform:scale(1.7);opacity:0;}
+
+    0%{
+        transform:scale(0.7);
+        opacity:1;
+    }
+
+    100%{
+        transform:scale(1.8);
+        opacity:0;
+    }
 }
 
-.live-status span{
-    font-size:0.85rem;
+.live-badge span{
+
+    font-size:0.88rem;
     font-weight:700;
-    color:#334155;
+
+    color:var(--secondary);
 }
 
 /* ==========================================================================
-   CALENDAR
+   CALENDAR AREA
    ========================================================================== */
 
-.calendar-body{
-    padding:18px;
+.calendar-area{
+    padding:24px;
 }
 
 /* Toolbar */
 
 .fc .fc-toolbar{
-    margin-bottom:18px !important;
+
+    margin-bottom:22px !important;
+
     gap:12px;
     flex-wrap:wrap;
 }
 
 .fc-toolbar-title{
-    font-size:1.45rem !important;
+
+    font-size:1.5rem !important;
     font-weight:800 !important;
-    color:var(--text);
+
+    color:var(--secondary);
+
+    letter-spacing:-0.5px;
 }
 
 /* Buttons */
@@ -218,20 +330,21 @@ body{
 
     color:#334155 !important;
 
-    border-radius:14px !important;
+    border-radius:16px !important;
 
-    padding:10px 15px !important;
+    padding:10px 16px !important;
 
-    font-size:0.82rem !important;
+    font-size:0.84rem !important;
     font-weight:700 !important;
 
-    box-shadow:
-    0 4px 12px rgba(15,23,42,0.06);
+    box-shadow:var(--shadow-sm);
 
     transition:0.25s ease;
 }
 
 .fc .fc-button:hover{
+
+    transform:translateY(-2px);
 
     background:
     linear-gradient(
@@ -242,7 +355,8 @@ body{
 
     color:white !important;
 
-    transform:translateY(-1px);
+    box-shadow:
+    0 14px 24px rgba(37,99,235,0.25);
 }
 
 .fc .fc-button-active{
@@ -268,53 +382,47 @@ body{
     border:none !important;
 }
 
-/* Days */
-
 .fc-col-header-cell{
+
     background:#f8fafc;
-    padding:12px 0 !important;
+
+    padding:13px 0 !important;
 }
 
 .fc-col-header-cell-cushion{
-    text-decoration:none !important;
+
     color:#475569 !important;
+
+    text-decoration:none !important;
 
     font-size:0.78rem;
     font-weight:800;
+
     letter-spacing:0.4px;
 }
 
-/* ==========================================================================
-   DATE SLOT SIZE FIX
-   Making calendar more horizontal rectangular
-   ========================================================================== */
+/* Day Slots */
 
 .fc-daygrid-day-frame{
+
     min-height:78px !important;
     height:78px !important;
 }
 
-.fc .fc-daygrid-day-top{
-    flex-direction:row;
-    justify-content:flex-end;
-}
+.fc-daygrid-day{
 
-.fc-daygrid-day-number{
-    text-decoration:none !important;
+    transition:0.2s ease;
 
-    color:#1e293b !important;
-
-    font-size:0.82rem;
-    font-weight:700;
-
-    padding:8px !important;
+    background:white;
 }
 
 .fc-daygrid-day:hover{
+
     background:#f8fbff;
 }
 
 .fc .fc-day-today{
+
     background:
     linear-gradient(
         180deg,
@@ -323,13 +431,24 @@ body{
     ) !important;
 }
 
+.fc-daygrid-day-number{
+
+    color:#1e293b !important;
+
+    text-decoration:none !important;
+
+    font-size:0.82rem;
+    font-weight:700;
+
+    padding:8px !important;
+}
+
 /* ==========================================================================
-   APPOINTMENT COUNT COLORS
+   EVENT COLORS
    ========================================================================== */
 
-/* LOW APPOINTMENTS 1-5 */
-
 .low-load{
+
     background:
     linear-gradient(
         135deg,
@@ -345,14 +464,13 @@ body{
     0 8px 18px rgba(34,197,94,0.25);
 }
 
-/* MEDIUM APPOINTMENTS 5-8 */
-
 .medium-load{
+
     background:
     linear-gradient(
         135deg,
-        #d97706,
-        #f59e0b
+        #f59e0b,
+        #fbbf24
     ) !important;
 
     color:white !important;
@@ -363,14 +481,13 @@ body{
     0 8px 18px rgba(245,158,11,0.25);
 }
 
-/* HIGH APPOINTMENTS ABOVE 8 */
-
 .high-load{
+
     background:
     linear-gradient(
         135deg,
-        #dc2626,
-        #ef4444
+        #ef4444,
+        #f87171
     ) !important;
 
     color:white !important;
@@ -383,11 +500,11 @@ body{
 
 .fc-event{
 
-    border-radius:10px !important;
+    border-radius:12px !important;
 
-    padding:3px 8px !important;
+    padding:4px 8px !important;
 
-    font-size:0.68rem !important;
+    font-size:0.7rem !important;
     font-weight:800 !important;
 
     transition:0.2s ease;
@@ -402,21 +519,29 @@ body{
    ========================================================================== */
 
 .sidebar-header{
-    padding:28px 28px 20px;
-    border-bottom:1px solid #edf2f7;
+
+    padding:32px 30px 22px;
+
+    border-bottom:1px solid rgba(226,232,240,0.7);
 }
 
 .sidebar-header h3{
+
     margin:0;
-    font-size:1.4rem;
+
+    font-size:1.5rem;
     font-weight:800;
-    color:var(--text);
+
+    color:var(--secondary);
 }
 
 .sidebar-header p{
+
     margin:10px 0 0;
+
     color:var(--muted);
-    font-size:0.9rem;
+
+    font-size:0.92rem;
 }
 
 /* ==========================================================================
@@ -424,8 +549,11 @@ body{
    ========================================================================== */
 
 .appointment-list{
-    padding:20px;
-    max-height:720px;
+
+    padding:22px;
+
+    max-height:760px;
+
     overflow-y:auto;
 }
 
@@ -434,7 +562,9 @@ body{
 }
 
 .appointment-list::-webkit-scrollbar-thumb{
+
     background:#cbd5e1;
+
     border-radius:20px;
 }
 
@@ -447,41 +577,60 @@ body{
     background:
     linear-gradient(
         180deg,
-        #ffffff,
-        #f8fafc
+        rgba(255,255,255,0.96),
+        rgba(248,250,252,0.96)
     );
 
-    border:1px solid #edf2f7;
+    border:1px solid rgba(226,232,240,0.9);
 
-    border-radius:24px;
+    border-radius:28px;
 
-    padding:20px;
+    padding:22px;
 
-    margin-bottom:18px;
-
-    transition:0.3s ease;
+    margin-bottom:20px;
 
     position:relative;
 
     overflow:hidden;
+
+    transition:0.3s ease;
+
+    animation:cardPop 0.5s ease;
+}
+
+@keyframes cardPop{
+
+    from{
+        opacity:0;
+        transform:scale(0.95);
+    }
+
+    to{
+        opacity:1;
+        transform:scale(1);
+    }
 }
 
 .appointment-card:hover{
 
-    transform:translateY(-3px);
+    transform:translateY(-4px);
 
     border-color:#bfdbfe;
 
     box-shadow:
-    0 16px 28px rgba(15,23,42,0.08);
+    0 20px 35px rgba(15,23,42,0.08);
 }
 
 .appointment-card::before{
+
     content:"";
+
     position:absolute;
+
     top:0;
     right:0;
-    width:5px;
+
+    width:6px;
     height:100%;
 
     background:
@@ -492,7 +641,12 @@ body{
     );
 }
 
+/* ==========================================================================
+   PATIENT SECTION
+   ========================================================================== */
+
 .patient-top{
+
     display:flex;
     gap:16px;
     align-items:flex-start;
@@ -500,10 +654,10 @@ body{
 
 .patient-avatar{
 
-    width:56px;
-    height:56px;
+    width:60px;
+    height:60px;
 
-    border-radius:18px;
+    border-radius:20px;
 
     background:
     linear-gradient(
@@ -518,13 +672,13 @@ body{
 
     color:white;
 
-    font-size:1.15rem;
+    font-size:1.2rem;
     font-weight:800;
 
     flex-shrink:0;
 
     box-shadow:
-    0 10px 20px rgba(37,99,235,0.22);
+    0 12px 24px rgba(37,99,235,0.22);
 }
 
 .patient-info{
@@ -532,30 +686,39 @@ body{
 }
 
 .patient-info h4{
+
     margin:0;
-    font-size:1rem;
+
+    font-size:1.02rem;
     font-weight:800;
-    color:#0f172a;
+
+    color:var(--secondary);
 }
 
 .patient-phone{
-    margin-top:9px;
+
+    margin-top:10px;
 
     display:flex;
     align-items:center;
-    gap:8px;
+    gap:9px;
 
-    color:#64748b;
+    color:var(--muted);
 
-    font-size:0.86rem;
+    font-size:0.88rem;
 }
 
 .patient-phone i{
     color:#2563eb;
 }
 
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+
 .patient-footer{
-    margin-top:20px;
+
+    margin-top:22px;
 
     display:flex;
     justify-content:space-between;
@@ -565,17 +728,15 @@ body{
     flex-wrap:wrap;
 }
 
-/* ==========================================================================
-   STATUS
-   ========================================================================== */
+/* Status */
 
 .status-badge{
 
-    padding:8px 15px;
+    padding:8px 16px;
 
     border-radius:999px;
 
-    font-size:0.7rem;
+    font-size:0.72rem;
     font-weight:800;
 
     text-transform:uppercase;
@@ -616,21 +777,21 @@ body{
     color:white;
     text-decoration:none;
 
-    padding:11px 16px;
+    padding:12px 18px;
 
-    border-radius:15px;
+    border-radius:16px;
 
-    font-size:0.8rem;
+    font-size:0.82rem;
     font-weight:700;
 
     display:flex;
     align-items:center;
-    gap:8px;
+    gap:10px;
 
     transition:0.25s ease;
 
     box-shadow:
-    0 10px 20px rgba(37,99,235,0.2);
+    0 12px 24px rgba(37,99,235,0.22);
 }
 
 .profile-btn:hover{
@@ -640,7 +801,7 @@ body{
     transform:translateY(-2px);
 
     box-shadow:
-    0 14px 24px rgba(37,99,235,0.28);
+    0 16px 30px rgba(37,99,235,0.3);
 }
 
 /* ==========================================================================
@@ -648,27 +809,38 @@ body{
    ========================================================================== */
 
 .empty-state{
+
     text-align:center;
-    padding:70px 20px;
+
+    padding:80px 20px;
 }
 
 .empty-state i{
-    font-size:3.2rem;
+
+    font-size:3.5rem;
+
     color:#cbd5e1;
-    margin-bottom:16px;
+
+    margin-bottom:18px;
 }
 
 .empty-state h4{
-    margin:0 0 8px;
-    font-size:1.05rem;
-    font-weight:800;
+
+    margin:0 0 10px;
+
     color:#334155;
+
+    font-size:1.1rem;
+    font-weight:800;
 }
 
 .empty-state p{
+
     margin:0;
+
     color:#64748b;
-    font-size:0.9rem;
+
+    font-size:0.92rem;
 }
 
 /* ==========================================================================
@@ -678,10 +850,10 @@ body{
 @media(max-width:768px){
 
     .dashboard-header{
-        padding:22px 20px 18px;
+        padding:24px 20px 18px;
     }
 
-    .calendar-body{
+    .calendar-area{
         padding:12px;
     }
 
@@ -693,17 +865,18 @@ body{
         padding:16px;
     }
 
-    .fc-toolbar{
+    .fc .fc-toolbar{
         flex-direction:column;
         align-items:center !important;
     }
 
     .fc-toolbar-title{
         font-size:1.1rem !important;
+        text-align:center;
     }
 
     .fc .fc-button{
-        padding:8px 11px !important;
+        padding:8px 12px !important;
         font-size:0.76rem !important;
     }
 
@@ -730,40 +903,40 @@ body{
 
 </style>
 
-<div class="container calendar-dashboard">
+<div class="container dashboard-wrapper">
 
     <div class="dashboard-grid">
 
         <!-- CALENDAR -->
-        <div class="glass-card">
+        <div class="ultra-card">
 
             <div class="dashboard-header">
 
-                <div>
+                <div class="header-content">
                     <h2>Appointment Calendar</h2>
-                    <p>Smart patient scheduling and appointment management</p>
+                    <p>Advanced smart scheduling and patient appointment management</p>
                 </div>
 
-                <div class="live-status">
+                <div class="live-badge">
                     <div class="live-dot"></div>
-                    <span>Live System</span>
+                    <span>System Active</span>
                 </div>
 
             </div>
 
-            <div class="calendar-body">
+            <div class="calendar-area">
                 <div id="calendar"></div>
             </div>
 
         </div>
 
         <!-- APPOINTMENTS -->
-        <div class="glass-card">
+        <div class="ultra-card">
 
             <div class="sidebar-header">
-                <h3>Appointments</h3>
+                <h3>Today's Focus</h3>
                 <p id="selectedDateText">
-                    Select a date from calendar
+                    Select a date from the calendar
                 </p>
             </div>
 
@@ -772,7 +945,7 @@ body{
                 <div class="empty-state">
                     <i class="fa-regular fa-calendar-days"></i>
                     <h4>No Date Selected</h4>
-                    <p>Select a calendar date to view appointments</p>
+                    <p>Choose a date to view appointment schedules</p>
                 </div>
 
             </div>
@@ -787,9 +960,7 @@ body{
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    var calendarEl = document.getElementById('calendar');
-
-    var calendar = new FullCalendar.Calendar(calendarEl, {
+    var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
 
         initialView: 'dayGridMonth',
 
@@ -804,10 +975,6 @@ document.addEventListener('DOMContentLoaded', function () {
             center: 'title',
             right: ''
         },
-
-        /* ==========================================================
-           COLOR INDICATION BASED ON APPOINTMENT COUNT
-           ========================================================== */
 
         events: function(fetchInfo, successCallback, failureCallback){
 
@@ -853,6 +1020,20 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(error => failureCallback(error));
         },
 
+        eventContent: function(arg) {
+
+            let container = document.createElement('div');
+
+            container.innerHTML = `
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>${arg.event.title}</span>
+                </div>
+            `;
+
+            return { domNodes: [container] };
+        },
+
         dateClick: function(info) {
 
             document.getElementById("selectedDateText").innerHTML =
@@ -864,22 +1045,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
             .then(data => {
 
-                let container = document.getElementById("appointmentTable");
+                let table = document.getElementById("appointmentTable");
 
                 if (!data.appointments || data.appointments.length === 0) {
 
-                    container.innerHTML = `
+                    table.innerHTML = `
                         <div class="empty-state">
                             <i class="fa-regular fa-calendar-xmark"></i>
                             <h4>No Appointments</h4>
-                            <p>No appointments scheduled for this date</p>
+                            <p>No schedules available for this date</p>
                         </div>
                     `;
 
                     return;
                 }
 
-                container.innerHTML = data.appointments.map(a => `
+                table.innerHTML = data.appointments.map(a => `
 
                     <div class="appointment-card">
 
